@@ -58,8 +58,18 @@ jobs:
 
     - name: scale in
       if: steps.check_scale.outputs.desired_capacity > 0
-      run: echo "CAN scale in..."
+      run: |
+        echo "CAN scale in..."
+        echo ::set-env name=can_scale::"true"
     
     - name: can't scale
       if: steps.check_scale.outputs.desired_capacity <= 0
       run: echo "CANNOT scale in becuase the desired capacity of ${{ steps.check_scale.outputs.desired_capacity }} is less than the minimum size of ${{ steps.bigip_scaling.outputs.bigip_min }}"
+  
+  scale:
+    if: env.can_scale == "true"
+    name: scale
+    runs-on: ubuntu-latest
+    steps:
+      - name: output environment variable
+        run: echo "This is the environment variable = ${{ env.can_scale }}"
