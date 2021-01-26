@@ -39,3 +39,10 @@ jobs:
         echo "This is BIG-IP minimum scaling value = ${{ steps.bigip_scaling.outputs.bigip_min }}"
         echo "This is BIG-IP maximum scaling value = ${{ steps.bigip_scaling.outputs.bigip_max }}"
 
+    - name: query student data
+      id: student_data
+      run: echo ::set-output name=bigip_instance_count::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.studentNbr }}/scaling/bigip/current_count
+
+    - name: output student data
+      run: echo "The current BIG-IP instance count for student ${{ steps.client_payload_data.studentNbr }} is ${{ steps.student_data.outputs.bigip_instance_count }}"
+
