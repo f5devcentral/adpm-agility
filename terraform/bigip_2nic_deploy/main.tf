@@ -9,11 +9,16 @@ resource random_id id {
   byte_length = 2
 }
 
+locals {
+  # Ids for multiple sets of EC2 instances, merged together
+  hostname = format("bigip.azure.%s.com", random_id.id.hex)
+}
+
 #
 # Create a resource group
 #
 resource azurerm_resource_group rg {
-  name     = format("%s-rg-%s", var.prefix, random_id.id.hex)
+  name     = format("%s-%s-rg", var.prefix, random_id.id.hex)
   location = var.location
 }
 
@@ -31,6 +36,7 @@ module bigip {
   external_securitygroup_ids = [module.external-network-security-group-public.network_security_group_id]
   availabilityZones          = var.availabilityZones
 }
+
 
 resource "null_resource" "clusterDO" {
 
