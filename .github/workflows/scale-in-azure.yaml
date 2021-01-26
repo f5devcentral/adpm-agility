@@ -8,6 +8,8 @@ jobs:
   build:
     name: build
     runs-on: ubuntu-latest
+    outputs:
+      can_scale: {{ steps.can_scale.outputs.can_scale }}
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -59,9 +61,11 @@ jobs:
       run: echo "This is the new desired capacity = ${{ steps.check_scale.outputs.desired_capacity }}"
 
     - name: scale in
+      id: can_scale
       if: steps.check_scale.outputs.desired_capacity > 0
       run: |
         echo "CAN scale in..."
+        echo ::set-output name=can_scale::"true"
     
     - name: can't scale
       if: steps.check_scale.outputs.desired_capacity <= 0
@@ -72,4 +76,4 @@ jobs:
     needs: build
     steps:
       - name: output environment variable
-        run: echo "This is the environment variable"
+        run: echo "This is the output variable from build step = ${{ needs.build.outputs.can_scale }}"
