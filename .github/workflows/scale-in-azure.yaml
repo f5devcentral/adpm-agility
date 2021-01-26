@@ -15,7 +15,9 @@ jobs:
     - name: output webhook payload
       run: echo "The source of the webhook is = ${{ github.event.client_payload }}"
     
-
+    - name: enable actions command processing
+      run: echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
+      
     - name: parse client payload data for scaling
       id: client_payload_data
       run: |
