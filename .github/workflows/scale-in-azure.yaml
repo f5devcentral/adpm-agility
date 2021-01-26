@@ -20,6 +20,9 @@ jobs:
       id: client_payload_data
       run: |
         echo ::set-output name=student_nbr::${{ github.event.client_payload.studentNbr }}
+    
+    - name: output student number
+      run: echo "This is the student number ${{ steps.client_payload_data.studentNbr }}"
 
     - name: install consul client
       run: sudo sh scripts/consul.sh
