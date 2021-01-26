@@ -53,10 +53,13 @@ jobs:
       id: check_scale
       run: echo ::set-output name=desired_capacity::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1)
 
+    - name: output desired capacity
+      run: echo "This is the new desired capacity = ${{ steps.check_scale.outputs.desired_capacity }}"
+
     - name: scale in
       if: steps.check_scale.outputs.desired_capacity > 0
       run: echo "CAN scale in..."
     
     - name: can't scale
       if: steps.check_scale.outputs.desired_capacity <= 0
-      run: echo "CANNOT scale in..."
+      run: echo "CANNOT scale in becuase the desired capacity of ${{ steps.check_scale.outputs.desired_capacity }} is less than the minimum size of ${{ steps.bigip_scaling.outputs.bigip_min }}"ßupdat"
