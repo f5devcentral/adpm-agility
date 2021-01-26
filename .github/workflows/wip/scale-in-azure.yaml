@@ -1,0 +1,41 @@
+name: scale-in-azure
+on:
+  repository_dispatch:
+    types: 
+      - scale-in-azure
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: output webhook payload
+      run: echo "The source of the webhook is = ${{ github.event.client_payload }}"
+    
+
+    - name: parse client payload data for scaling
+      id: client_payload_data
+      run: |
+        echo ::set-output name=student_nbr::${{ github.event.client_payload.studentNbr }}
+        
+    - name: install consul client
+      run: sudo sh scripts/consul.sh
+
+    - name: get consul server parameters
+      id: consul_params
+      run: echo ::set-output name=consul_server::$(cat configs/consul_server.cfg)
+
+    - name: query bigip scaling min/max values
+      id: bigip_scaling
+      run: |
+        echo ::set-output name=bigip_min::$(consul kv get -http-addr=${{ steps.consul_params.output.consul_server }} adpm/labs/agility/common/scaling/bigip/min)
+        echo ::set-output name=bigip_max::$(consul kv get -http-addr=${{ steps.consul_params.output.consul_server }} adpm/labs/agility/common/scaling/bigip/max)
+
+    - name: output min and max values
+      run: |
+        echo "This is BIG-IP minimum scaling value = ${{ steps.bigip_scaling.outputs.bigip_min }}"
+        echo "This is BIG-IP maximum scaling value = ${{ steps.bigip_scaling.outputs.bigip_max }}"
+
