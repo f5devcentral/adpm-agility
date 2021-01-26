@@ -62,7 +62,6 @@ jobs:
       if: steps.check_scale.outputs.desired_capacity > 0
       run: |
         echo "CAN scale in..."
-        echo ::set-env name=can_scale::"true"
     
     - name: can't scale
       if: steps.check_scale.outputs.desired_capacity <= 0
