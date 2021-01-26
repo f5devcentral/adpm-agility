@@ -36,6 +36,9 @@ output private_addresses {
   value = module.bigip.*.private_addresses
 }
 
+output hostname {
+  value = local.hostname
+}
 
 
 
