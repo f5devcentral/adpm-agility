@@ -22,7 +22,7 @@ jobs:
         echo ::set-output name=student_nbr::${{ github.event.client_payload.studentNbr }}
     
     - name: output student number
-      run: echo "This is the student number ${{ steps.client_payload_data.outputs.studentNbr }}"
+      run: echo "This is the student number ${{ steps.client_payload_data.outputs.student_nbr }}"
 
     - name: install consul client
       run: sudo sh scripts/consul.sh
@@ -49,3 +49,14 @@ jobs:
     - name: output student data
       run: echo "The current BIG-IP instance count for student ${{ steps.client_payload_data.outputs.student_nbr }} is ${{ steps.student_data.outputs.bigip_instance_count }}"
 
+    - name: check if can scale in
+      id: check_scale
+      run: echo ::set-output name=desired_capacity::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1)
+
+    - name: scale in
+      if: steps.check_scale.outputs.desired_capacity > 0
+      run: echo "CAN scale in..."
+    
+    - name: can't scale
+      if: steps.check_scale.outputs.desired_capacity <= 0
+      run: echo "CANNOT scale in..."
