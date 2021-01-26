@@ -78,6 +78,6 @@ jobs:
     steps:
       - name: output environment variable
         run: |
-          echo "This is the can_scale variable from build step = ${{ needs.build.outputs.can_scale }}
+          echo "This is the can_scale variable from build step = ${{ needs.build.outputs.can_scale }}""
           echo "This is the desired_capacity variable from build step = ${{ needs.build.outputs.desired_capacity }}"
 
