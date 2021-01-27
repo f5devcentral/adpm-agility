@@ -20,6 +20,13 @@ terraform {
  } 
 }
 
+#
+# Create a random id
+#
+resource random_id id {
+  byte_length = 2
+}
+
 locals {
   bigip_map = {
     "mgmt_subnet_ids"            = var.mgmt_subnet_ids
@@ -29,7 +36,7 @@ locals {
     "internal_subnet_ids"        = var.internal_subnet_ids
     "internal_securitygroup_ids" = var.internal_securitygroup_ids
   }
-
+ 
   mgmt_public_subnet_id = [
     for subnet in local.bigip_map["mgmt_subnet_ids"] :
     subnet["subnet_id"]
@@ -89,8 +96,6 @@ locals {
     if private["public_ip"] == true 
   ]
 
-
-
   external_public_index = [
     for index, subnet in local.bigip_map["external_subnet_ids"] :
     index
@@ -116,7 +121,6 @@ locals {
     private["private_ip_secondary"]
     if private["public_ip"] == false 
   ]
-
 
   external_private_index = [
     for index, subnet in local.bigip_map["external_subnet_ids"] :
@@ -165,16 +169,9 @@ locals {
   total_nics  = length(concat(local.mgmt_public_subnet_id, local.mgmt_private_subnet_id, local.external_public_subnet_id, local.external_private_subnet_id, local.internal_public_subnet_id, local.internal_private_subnet_id))
   vlan_list   = concat(local.external_public_subnet_id, local.external_private_subnet_id, local.internal_public_subnet_id, local.internal_private_subnet_id)
   selfip_list = concat(azurerm_network_interface.external_nic.*.private_ip_address, azurerm_network_interface.external_public_nic.*.private_ip_address, azurerm_network_interface.internal_nic.*.private_ip_address)
-  instance_prefix = format("%s-%s", var.prefix, random_id.module_id.hex)
-  gw_bytes_nic = local.total_nics > 1 ? "${element(split("/",local.selfip_list[0]), 0 )}" : ""
+  instance_prefix = format("%s-%s", local.student_id, random_id.id.hex)
+  gw_bytes_nic = local.total_nics > 1 ? element(split("/",local.selfip_list[0]), 0 ): ""
 
-}
-
-#
-# Create a random id
-#
-resource "random_id" "module_id" {
-  byte_length = 2
 }
 
 data "azurerm_resource_group" "bigiprg" {
@@ -230,7 +227,7 @@ resource "azurerm_public_ip" "mgmt_public_ip" {
   name                = "${local.instance_prefix}-pip-mgmt-${count.index}"
   location            = data.azurerm_resource_group.bigiprg.location
   resource_group_name = data.azurerm_resource_group.bigiprg.name
-  domain_name_label   = format("%s-mgmt-%s", local.instance_prefix, count.index)
+  domain_name_label   = format("mgmt-%s-%s", local.instance_prefix, count.index)
   allocation_method   = "Static"   # Static is required due to the use of the Standard sku
   sku                 = "Standard" # the Standard sku is required due to the use of availability zones
   zones               = var.availabilityZones
@@ -245,7 +242,7 @@ resource "azurerm_public_ip" "secondary_external_public_ip" {
   name                = "${local.instance_prefix}-secondary-pip-ext-${count.index}"
   location            = data.azurerm_resource_group.bigiprg.location
   resource_group_name = data.azurerm_resource_group.bigiprg.name
-  domain_name_label = format("%s-sec-ext-%s", local.instance_prefix, count.index)
+  domain_name_label   = format("sec-ext-%s-%s", local.instance_prefix, count.index)
   allocation_method = "Static"   # Static is required due to the use of the Standard sku
   sku               = "Standard" # the Standard sku is required due to the use of availability zones
   zones             = var.availabilityZones
@@ -256,18 +253,19 @@ resource "azurerm_public_ip" "secondary_external_public_ip" {
 }
 
 resource "azurerm_public_ip" "alb_public_ip" {
-  name                = "alb-pip"
+  name                = "${local.instance_prefix}-alb-pip"
   location            = data.azurerm_resource_group.bigiprg.location
   resource_group_name = data.azurerm_resource_group.bigiprg.name
   allocation_method   = "Static"
   sku                 = "Standard"
+  zones             = var.availabilityZones
 }
 
 #
 # Create a load balancer for bigip(s)
 #
 resource "azurerm_lb" "alb" {
-  name                = "alb-bigip"
+  name                = "${local.instance_prefix}-alb-bigip"
   location            = data.azurerm_resource_group.bigiprg.location
   resource_group_name = data.azurerm_resource_group.bigiprg.name
   sku                 = "Standard"
@@ -282,13 +280,6 @@ resource "azurerm_lb_backend_address_pool" "alb-backend" {
   resource_group_name = data.azurerm_resource_group.bigiprg.name
   loadbalancer_id     = azurerm_lb.alb.id
   name                = "f5pool-${local.instance_prefix}"
-}
-
-resource "azurerm_network_interface_backend_address_pool_association" "alb-associate" {
-  count                   = length(local.external_private_subnet_id)
-  network_interface_id    = "${local.instance_prefix}-ext-nic-${count.index}.id"
-  ip_configuration_name   = "${local.instance_prefix}-ext-ip-${count.index}"
-  backend_address_pool_id = azurerm_lb_backend_address_pool.alb-backend.id
 }
 
 # Deploy BIG-IP with N-Nic interface 
@@ -457,7 +448,7 @@ resource "azurerm_virtual_machine" "f5vm" {
     Name   = "${local.instance_prefix}-f5vm01"
     source = "terraform"
   }
-  depends_on = [azurerm_network_interface_security_group_association.mgmt_security, azurerm_network_interface_security_group_association.internal_security, azurerm_network_interface_security_group_association.external_security, azurerm_network_interface_security_group_association.external_public_security]
+  depends_on = [azurerm_network_interface_security_group_association.mgmt_security, azurerm_network_interface_security_group_association.internal_security, azurerm_network_interface_security_group_association.external_security, azurerm_network_interface_security_group_association.external_public_security, azurerm_public_ip.secondary_external_public_ip, azurerm_public_ip.mgmt_public_ip, azurerm_public_ip.alb_public_ip]
 }
 
 ## ..:: Run Startup Script ::..
