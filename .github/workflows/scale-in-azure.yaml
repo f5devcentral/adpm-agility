@@ -114,6 +114,9 @@ jobs:
           output_file: ./terraform/github_actions/outputs.tf
           variables:
             student_nbr=${{ needs.build.outputs.student_nbr }}
+      
+      - name: show rendered terraform file
+        run: cat ./terraform/github_actions/outputs.tf
 
       - name: terraform init
         run: terraform init ./terraform/github_actions
