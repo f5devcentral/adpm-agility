@@ -99,7 +99,7 @@ jobs:
         run: echo ::set-output name=azure_data::$(echo {{ secrets.AZURE_CREDS }})
 
       - name: show secret secret_info
-        run: echo "this is the secret info = ${{ steps.secret_info.outputs.azure_data }}" | jq .
+        run: echo "this is the secret info = ${{ secrets.AZURE_CREDS }}" | jq .
       
       - name: initialize terraform environment
         uses: hashicorp/setup-terraform@v1
