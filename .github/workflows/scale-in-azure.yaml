@@ -95,7 +95,11 @@ jobs:
         run: az account list
       
       - name: output github secret info
-        run: echo ${{ secrets.AZURE_CREDS }} | jq '.tenantId'
+        id: secret_info
+        run: echo set-output name=azure_data::${{ secrets.AZURE_CREDS }}
+
+      - name: show secret secret_info
+        run: echo "this is the secret info = ${{ steps.secret_info.outputs.azure_data }}"
       
       - name: initialize terraform environment
         uses: hashicorp/setup-terraform@v1
