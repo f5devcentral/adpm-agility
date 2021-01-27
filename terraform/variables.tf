@@ -110,6 +110,8 @@ variable script_name {
   default = "f5_onboard"
 }
 
+
+
 ## Please check and update the latest DO URL from https://github.com/F5Networks/f5-declarative-onboarding/releases
 # always point to a specific version in order to avoid inadvertent configuration inconsistency
 variable doPackageUrl {
