@@ -1,5 +1,5 @@
 provider azurerm {
-  features {}
+    features {}
 }
 
 #
@@ -11,14 +11,14 @@ resource random_id id {
 
 locals {
   # Ids for multiple sets of EC2 instances, merged together
-  hostname = format("bigip.azure.%s.com", random_id.id.hex)
+  hostname    = format("bigip.azure.%s.com", local.student_id)
 }
 
 #
 # Create a resource group
 #
 resource azurerm_resource_group rg {
-  name     = format("%s-%s-rg", var.prefix, random_id.id.hex)
+  name     = format("student-%s-%s-rg", local.student_id, random_id.id.hex)
   location = var.location
 }
 
@@ -59,7 +59,7 @@ resource "null_resource" "clusterDO" {
 
 module "network" {
   source              = "Azure/vnet/azurerm"
-  vnet_name           = format("%s-vnet-%s", var.prefix, random_id.id.hex)
+  vnet_name           = format("%s-vnet-%s", local.student_id, random_id.id.hex)
   resource_group_name = azurerm_resource_group.rg.name
   address_space       = [var.cidr]
   subnet_prefixes     = [cidrsubnet(var.cidr, 8, 1), cidrsubnet(var.cidr, 8, 2)]
@@ -91,7 +91,7 @@ data "azurerm_subnet" "external-public" {
 module mgmt-network-security-group {
   source              = "Azure/network-security-group/azurerm"
   resource_group_name = azurerm_resource_group.rg.name
-  security_group_name = format("%s-mgmt-nsg-%s", var.prefix, random_id.id.hex)
+  security_group_name = format("%s-mgmt-nsg-%s", local.student_id, random_id.id.hex )
   tags = {
     environment = "dev"
     costcenter  = "terraform"
@@ -104,7 +104,7 @@ module mgmt-network-security-group {
 module external-network-security-group-public {
   source              = "Azure/network-security-group/azurerm"
   resource_group_name = azurerm_resource_group.rg.name
-  security_group_name = format("%s-external-public-nsg-%s", var.prefix, random_id.id.hex)
+  security_group_name = format("%s-external-public-nsg-%s", local.student_id, random_id.id.hex)
   tags = {
     environment = "dev"
     costcenter  = "terraform"
@@ -122,7 +122,7 @@ resource "azurerm_network_security_rule" "mgmt_allow_https" {
   destination_address_prefix  = "*"
   source_address_prefixes     = var.AllowedIPs
   resource_group_name         = azurerm_resource_group.rg.name
-  network_security_group_name = format("%s-mgmt-nsg-%s", var.prefix, random_id.id.hex)
+  network_security_group_name = format("%s-mgmt-nsg-%s", local.student_id, random_id.id.hex)
   depends_on                  = [module.mgmt-network-security-group]
 }
 resource "azurerm_network_security_rule" "mgmt_allow_ssh" {
@@ -136,7 +136,7 @@ resource "azurerm_network_security_rule" "mgmt_allow_ssh" {
   destination_address_prefix  = "*"
   source_address_prefixes     = var.AllowedIPs
   resource_group_name         = azurerm_resource_group.rg.name
-  network_security_group_name = format("%s-mgmt-nsg-%s", var.prefix, random_id.id.hex)
+  network_security_group_name = format("%s-mgmt-nsg-%s", local.student_id, random_id.id.hex)
   depends_on                  = [module.mgmt-network-security-group]
 }
 
@@ -151,7 +151,7 @@ resource "azurerm_network_security_rule" "external_allow_https" {
   destination_address_prefix  = "*"
   source_address_prefixes     = var.AllowedIPs
   resource_group_name         = azurerm_resource_group.rg.name
-  network_security_group_name = format("%s-external-public-nsg-%s", var.prefix, random_id.id.hex)
+  network_security_group_name = format("%s-external-public-nsg-%s", local.student_id, random_id.id.hex)
   depends_on                  = [module.external-network-security-group-public]
 }
 resource "azurerm_network_security_rule" "external_allow_ssh" {
@@ -165,7 +165,7 @@ resource "azurerm_network_security_rule" "external_allow_ssh" {
   destination_address_prefix  = "*"
   source_address_prefixes     = var.AllowedIPs
   resource_group_name         = azurerm_resource_group.rg.name
-  network_security_group_name = format("%s-external-public-nsg-%s", var.prefix, random_id.id.hex)
+  network_security_group_name = format("%s-external-public-nsg-%s", local.student_id, random_id.id.hex)
   depends_on                  = [module.external-network-security-group-public]
 }
 

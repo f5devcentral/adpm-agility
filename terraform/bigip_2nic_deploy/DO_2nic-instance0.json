@@ -7,7 +7,7 @@
         "class": "Tenant",
         "mySystem": {
                 "class": "System",
-                "hostname": "glcme-2nic-254a-mgmt-0.eastus.cloudapp.azure.com"
+                "hostname": "mgmt-1768-d101-0.eastus.cloudapp.azure.com"
             },
     "myDns": {
         "class": "DNS",
