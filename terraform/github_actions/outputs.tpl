@@ -7,7 +7,11 @@ data "terraform_remote_state" "foo" {
 }
 
 output "version" {
-  value = data.terraform_remote_state.foo.resources
+  value = data.terraform_remote_state.foo
+}
+
+output "test" {
+  value = "TESTING"
 }
 
 # output "vpc" {
