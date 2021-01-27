@@ -96,12 +96,12 @@ jobs:
       - name: run azure command
         run: az account list
       
-      - name: output github secret info
-        id: secret_info
-        run: echo ::set-output name=azure_data::$(echo {{ secrets.AZURE_CREDS }})
+      # - name: output github secret info
+      #   id: secret_info
+      #   run: echo ::set-output name=azure_data::$(echo {{ secrets.AZURE_CREDS }})
 
-      - name: show secret secret_info
-        run: echo "${{ secrets.AZURE_CREDS }}"
+      # - name: show secret secret_info
+      #   run: echo "${{ secrets.AZURE_CREDS }}"
       
       - name: initialize terraform environment
         uses: hashicorp/setup-terraform@v1
@@ -131,6 +131,12 @@ jobs:
           output_file: ./terraform/github_actions/outputs.tf
           variables:
             student_nbr=${{ needs.build.outputs.student_nbr }}
+            client_id=${{ secrets.azure_client_id }}
+            subscription_id=${{ secrets.azure_subscription_id }}
+            tenant_id=${{ secrets.azure_tenant_id }}
+            client_secret=${{ secrets.azure_client_secret }}
+
+
       
       - name: show rendered terraform file
         run: cat ./terraform/github_actions/outputs.tf
