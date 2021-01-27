@@ -13,9 +13,6 @@ provider "azurerm" {
   client_secret = {{ client_secret }}
 }
 
-
-
-
 data "terraform_remote_state" "foo" {
   backend = "consul"
   config = {
