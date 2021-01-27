@@ -96,7 +96,7 @@ jobs:
       
       - name: output github secret info
         id: secret_info
-        run: echo ::set-output name=azure_data::${{ secrets.AZURE_CREDS }}
+        run: echo ::set-output name=azure_data::$(echo {{ secrets.AZURE_CREDS }})
 
       - name: show secret secret_info
         run: echo "this is the secret info = ${{ steps.secret_info.outputs.azure_data }}"
