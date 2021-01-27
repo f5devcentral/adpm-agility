@@ -107,3 +107,10 @@ jobs:
       - name: show rendered output
         run: cat ./rendered.txt
 
+      - name: initialize terraform
+        run: |
+            cd /terraform/github_actions
+            terraform init
+            terraform plan
+            terraform apply --auto-approve
+
