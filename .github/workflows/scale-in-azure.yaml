@@ -89,3 +89,14 @@ jobs:
       - name: output terraform version 
         run: terraform version
 
+      - name: process template file using jinja2
+        uses: cuchi/jinja2-action@v1.2.0
+        with:
+          template: ./test.tpl
+          output_file: ./rendered.txt
+          variables:
+            value=4
+
+      - name: show rendered output
+        run: cat ./rendered.txt
+
