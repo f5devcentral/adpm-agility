@@ -128,7 +128,8 @@ jobs:
         with:
           template: ./terraform/github_actions/outputs.tpl
           output_file: ./terraform/github_actions/outputs.tf
-          variables: student_nbr=${{ needs.build.outputs.student_nbr }}
+          variables: |
+            student_nbr=${{ needs.build.outputs.student_nbr }}
             client_id=${{ secrets.AZURE_CLIENT_ID }}
             subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}
             tenant_id=${{ secrets.AZURE_TENANT_ID }}
