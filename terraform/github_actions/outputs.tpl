@@ -6,6 +6,8 @@ terraform {
   }
 }
 
+provider "azurerm" {}
+
 
 
 
