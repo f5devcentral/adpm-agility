@@ -11,6 +11,7 @@ jobs:
     outputs:
       can_scale: ${{ steps.can_scale.outputs.can_scale }}
       desired_capacity: ${{ steps.check_scale.outputs.desired_capacity }}
+      student_nbr: ${{ steps.client_payload_data.outputs.student_nbr }}
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -83,6 +84,7 @@ jobs:
         run: |
           echo "This is the can_scale variable from build step = ${{ needs.build.outputs.can_scale }}"
           echo "This is the desired_capacity variable from build step = ${{ needs.build.outputs.desired_capacity }}"
+          echo "this is the student number = ${{ needs.build.outputs.student_nbr }} "
       
       - name: initialize terraform environment
         uses: hashicorp/setup-terraform@v1
