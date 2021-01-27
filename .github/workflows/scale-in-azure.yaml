@@ -89,7 +89,7 @@ jobs:
       - name: initialize terraform environment
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: ~0.13.0
+          terraform_version: ~0.14.3
 
       - name: output terraform version 
         run: terraform version
@@ -107,10 +107,19 @@ jobs:
       - name: show rendered output
         run: cat ./rendered.txt
 
-      - name: initialize terraform
-        run: |
-            cd terraform/github_actions
-            terraform init
-            terraform plan
-            terraform apply --auto-approve
+      - name: process template file using jinja2
+        uses: cuchi/jinja2-action@v1.2.0
+        with:
+          template: ./terraform/github_actions/outputs.tpl
+          output_file: ./terraform/github_actions/outputs.tf
+          variables:
+            student_nbr=${{ needs.build.outputs.student_nbr }}
 
+      - name: terraform init
+        run: terraform init ./terraform/github_actions
+      
+      - name: terraform plan
+        run: terraform plan ./terraform/github_actions
+      
+      - name: terraform apply
+        run: terraform apply --auto-approve ./terraform/github_actions
