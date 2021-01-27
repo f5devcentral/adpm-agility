@@ -1,7 +1,7 @@
 name: scale-in-azure
 on:
   repository_dispatch:
-    types: 
+    types:
       - scale-in-azure
 
 jobs:
@@ -13,66 +13,66 @@ jobs:
       desired_capacity: ${{ steps.check_scale.outputs.desired_capacity }}
       student_nbr: ${{ steps.client_payload_data.outputs.student_nbr }}
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
 
-    - name: output webhook payload
-      run: echo "The source of the webhook is = ${{ github.event.client_payload }}"
-    
-    # - name: enable actions command processing
-    #   run: echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
+      - name: output webhook payload
+        run: echo "The source of the webhook is = ${{ github.event.client_payload }}"
 
-    - name: parse client payload data for scaling
-      id: client_payload_data
-      run: |
-        echo ::set-output name=student_nbr::${{ github.event.client_payload.studentNbr }}
-    
-    - name: output student number
-      run: echo "This is the student number ${{ steps.client_payload_data.outputs.student_nbr }}"
+      # - name: enable actions command processing
+      #   run: echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
 
-    - name: install consul client
-      run: sudo sh scripts/consul.sh
+      - name: parse client payload data for scaling
+        id: client_payload_data
+        run: |
+          echo ::set-output name=student_nbr::${{ github.event.client_payload.studentNbr }}
 
-    - name: get consul server parameters
-      id: consul_params
-      run: echo ::set-output name=consul_server::$(cat configs/consul_server.cfg)
+      - name: output student number
+        run: echo "This is the student number ${{ steps.client_payload_data.outputs.student_nbr }}"
 
-    - name: query bigip scaling min/max values
-      id: bigip_scaling
-      run: |
-        echo ::set-output name=bigip_min::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/common/scaling/bigip/min)
-        echo ::set-output name=bigip_max::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/common/scaling/bigip/max)
+      - name: install consul client
+        run: sudo sh scripts/consul.sh
 
-    - name: output min and max values
-      run: |
-        echo "This is BIG-IP minimum scaling value = ${{ steps.bigip_scaling.outputs.bigip_min }}"
-        echo "This is BIG-IP maximum scaling value = ${{ steps.bigip_scaling.outputs.bigip_max }}"
+      - name: get consul server parameters
+        id: consul_params
+        run: echo ::set-output name=consul_server::$(cat configs/consul_server.cfg)
 
-    - name: query student data
-      id: student_data
-      run: echo ::set-output name=bigip_instance_count::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.outputs.student_nbr }}/scaling/bigip/current_count)
+      - name: query bigip scaling min/max values
+        id: bigip_scaling
+        run: |
+          echo ::set-output name=bigip_min::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/common/scaling/bigip/min)
+          echo ::set-output name=bigip_max::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/common/scaling/bigip/max)
 
-    - name: output student data
-      run: echo "The current BIG-IP instance count for student ${{ steps.client_payload_data.outputs.student_nbr }} is ${{ steps.student_data.outputs.bigip_instance_count }}"
+      - name: output min and max values
+        run: |
+          echo "This is BIG-IP minimum scaling value = ${{ steps.bigip_scaling.outputs.bigip_min }}"
+          echo "This is BIG-IP maximum scaling value = ${{ steps.bigip_scaling.outputs.bigip_max }}"
 
-    - name: check if can scale in
-      id: check_scale
-      run: echo ::set-output name=desired_capacity::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1)
+      - name: query student data
+        id: student_data
+        run: echo ::set-output name=bigip_instance_count::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.outputs.student_nbr }}/scaling/bigip/current_count)
 
-    - name: output desired capacity
-      run: echo "This is the new desired capacity = ${{ steps.check_scale.outputs.desired_capacity }}"
+      - name: output student data
+        run: echo "The current BIG-IP instance count for student ${{ steps.client_payload_data.outputs.student_nbr }} is ${{ steps.student_data.outputs.bigip_instance_count }}"
 
-    - name: scale in
-      id: can_scale
-      if: steps.check_scale.outputs.desired_capacity > 0
-      run: |
-        echo "CAN scale in..."
-        echo ::set-output name=can_scale::"true"
-    
-    - name: can't scale
-      if: steps.check_scale.outputs.desired_capacity <= 0
-      run: echo "CANNOT scale in becuase the desired capacity of ${{ steps.check_scale.outputs.desired_capacity }} is less than the minimum size of ${{ steps.bigip_scaling.outputs.bigip_min }}"
-  
+      - name: check if can scale in
+        id: check_scale
+        run: echo ::set-output name=desired_capacity::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1)
+
+      - name: output desired capacity
+        run: echo "This is the new desired capacity = ${{ steps.check_scale.outputs.desired_capacity }}"
+
+      - name: scale in
+        id: can_scale
+        if: steps.check_scale.outputs.desired_capacity > 0
+        run: |
+          echo "CAN scale in..."
+          echo ::set-output name=can_scale::"true"
+
+      - name: can't scale
+        if: steps.check_scale.outputs.desired_capacity <= 0
+        run: echo "CANNOT scale in becuase the desired capacity of ${{ steps.check_scale.outputs.desired_capacity }} is less than the minimum size of ${{ steps.bigip_scaling.outputs.bigip_min }}"
+
   scale:
     runs-on: ubuntu-latest
     env:
@@ -88,27 +88,27 @@ jobs:
           echo "This is the desired_capacity variable from build step = ${{ needs.build.outputs.desired_capacity }}"
           echo "this is the student number = ${{ needs.build.outputs.student_nbr }} "
 
-      - name: login to azure 
+      - name: login to azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDS }}
 
       - name: run azure command
         run: az account list
-      
+
       # - name: output github secret info
       #   id: secret_info
       #   run: echo ::set-output name=azure_data::$(echo {{ secrets.AZURE_CREDS }})
 
       # - name: show secret secret_info
       #   run: echo "${{ secrets.AZURE_CREDS }}"
-      
+
       - name: initialize terraform environment
         uses: hashicorp/setup-terraform@v1
         with:
           terraform_version: ~0.14.3
 
-      - name: output terraform version 
+      - name: output terraform version
         run: terraform version
 
       - name: process template file using jinja2
@@ -116,8 +116,7 @@ jobs:
         with:
           template: ./test.tpl
           output_file: ./rendered.txt
-          variables:
-            can_scale=${{ needs.build.outputs.can_scale }}
+          variables: can_scale=${{ needs.build.outputs.can_scale }}
             desired_capacity=${{ needs.build.outputs.desired_capacity }}
             student_nbr=${{ needs.build.outputs.student_nbr }}
 
@@ -129,23 +128,20 @@ jobs:
         with:
           template: ./terraform/github_actions/outputs.tpl
           output_file: ./terraform/github_actions/outputs.tf
-          variables:
-            student_nbr=${{ needs.build.outputs.student_nbr }}
-            client_id=${{ secrets.azure_client_id }}
-            subscription_id=${{ secrets.azure_subscription_id }}
-            tenant_id=${{ secrets.azure_tenant_id }}
-            client_secret=${{ secrets.azure_client_secret }}
+          variables: student_nbr=${{ needs.build.outputs.student_nbr }}
+            client_id=${{ secrets.AZURE_CLIENT_ID }}
+            subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}
+            tenant_id=${{ secrets.AZURE_TENANT_ID }}
+            client_secret=${{ secrets.AZURE_CLIENT_SECRET }}
 
-
-      
       - name: show rendered terraform file
         run: cat ./terraform/github_actions/outputs.tf
 
       - name: terraform init
         run: terraform init ./terraform/github_actions
-      
+
       - name: terraform plan
         run: terraform plan ./terraform/github_actions
-      
+
       - name: terraform apply
         run: terraform apply --auto-approve ./terraform/github_actions
