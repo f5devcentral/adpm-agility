@@ -85,6 +85,11 @@ jobs:
           echo "This is the can_scale variable from build step = ${{ needs.build.outputs.can_scale }}"
           echo "This is the desired_capacity variable from build step = ${{ needs.build.outputs.desired_capacity }}"
           echo "this is the student number = ${{ needs.build.outputs.student_nbr }} "
+
+      - name: login to azure 
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDS }}
       
       - name: initialize terraform environment
         uses: hashicorp/setup-terraform@v1
