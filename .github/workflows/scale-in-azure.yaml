@@ -100,7 +100,9 @@ jobs:
           template: ./test.tpl
           output_file: ./rendered.txt
           variables:
-            value=4
+            can_scale=${{ needs.build.outputs.can_scale }}
+            desired_capacity=${{ needs.build.outputs.desired_capacity }}
+            student_nbr=${{ needs.build.outputs.student_nbr }}
 
       - name: show rendered output
         run: cat ./rendered.txt
