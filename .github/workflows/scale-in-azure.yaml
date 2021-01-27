@@ -90,6 +90,9 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDS }}
+
+      - name: run azure command
+        run: az account list
       
       - name: initialize terraform environment
         uses: hashicorp/setup-terraform@v1
