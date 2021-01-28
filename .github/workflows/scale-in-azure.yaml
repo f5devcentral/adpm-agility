@@ -114,18 +114,6 @@ jobs:
       - name: process template file using jinja2
         uses: cuchi/jinja2-action@v1.2.0
         with:
-          template: ./test.tpl
-          output_file: ./rendered.txt
-          variables: can_scale=${{ needs.build.outputs.can_scale }}
-            desired_capacity=${{ needs.build.outputs.desired_capacity }}
-            student_nbr=${{ needs.build.outputs.student_nbr }}
-
-      - name: show rendered output
-        run: cat ./rendered.txt
-
-      - name: process template file using jinja2
-        uses: cuchi/jinja2-action@v1.2.0
-        with:
           template: ./terraform/github_actions/outputs.tpl
           output_file: ./terraform/github_actions/outputs.tf
           variables: |
