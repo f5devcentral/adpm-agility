@@ -11,6 +11,7 @@ provider "azurerm" {
   subscription_id = {{ subscription_id }}
   tenant_id = {{ tenant_id }}
   client_secret = {{ client_secret }}
+}
 
 
 data "terraform_remote_state" "foo" {
