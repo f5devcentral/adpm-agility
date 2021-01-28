@@ -78,7 +78,7 @@ jobs:
         run: echo "CANNOT scale in becuase the desired capacity of ${{ steps.check_scale.outputs.desired_capacity }} is less than the minimum size of ${{ steps.bigip_scaling.outputs.bigip_min }}"
 
   scale:
-    if: needs.build.outputs.can_scale == 'false'
+    if: needs.build.outputs.can_scale == 'true'
     runs-on: ubuntu-latest
     env:
       ACTIONS_ALLOW_UNSECURE_COMMANDS: true
