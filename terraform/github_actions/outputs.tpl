@@ -6,6 +6,10 @@ terraform {
   }
 }
 
+provider "consul" {
+  address = "54.162.126.20:8500"
+}
+
 provider "azurerm" {
   client_id = "{{ client_id }}"
   subscription_id = "{{ subscription_id }}"
