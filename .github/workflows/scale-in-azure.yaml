@@ -62,7 +62,7 @@ jobs:
       - name: calculate difference
         id: delta
         run: |
-          echo ::set-output name=scale-in::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1 - ${{ steps.bigip_scaling.outputs.bigip_min }})
+          echo ::set-output name=scale-in::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - ${{ steps.bigip_scaling.outputs.bigip_min }})
           echo ::set-output name=scale-out::$(expr ${{ steps.bigip_scaling.outputs.bigip_max }} - ${{ steps.student_data.outputs.bigip_instance_count }} + 1 )
 
       - name: output deltas
