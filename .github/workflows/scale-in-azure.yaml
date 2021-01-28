@@ -64,7 +64,7 @@ jobs:
         if: (expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1) > 0)
         id: check_scale
         run: |
-          echo (expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1) > 0)
+          echo $(expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1) > 0)
           echo "this is the result $(expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1) > 0"
           echo "YES!"
           echo ::set-output name=desired_capacity::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1)
