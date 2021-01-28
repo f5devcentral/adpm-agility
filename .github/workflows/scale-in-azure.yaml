@@ -63,12 +63,12 @@ jobs:
         id: delta
         run: |
           echo ::set-output name=scale-in::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1 - ${{ steps.bigip_scaling.outputs.bigip_min }})
-          echo ::set-output name=scale-out::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} + 1 - ${{ steps.bigip_scaling.outputs.bigip_max }})
+          echo ::set-output name=scale-out::$(expr ${{ steps.bigip_scaling.outputs.bigip_max }} - ${{ steps.student_data.outputs.bigip_instance_count }} + 1 )
 
       - name: output deltas
         run: |
           echo "this is the scale in value = ${{ steps.delta.outputs.scale-in }}"
-          echo up"this is the scale out value = ${{ steps.delta.outputs.scale-out }}"
+          echo "this is the scale out value = ${{ steps.delta.outputs.scale-out }}"
 
       - name: check if can scale in
         # if: github.event.client_payload.scaling_type == 'in' && ((expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1) > 0)
