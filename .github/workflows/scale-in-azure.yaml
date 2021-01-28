@@ -72,7 +72,7 @@ jobs:
 
       - name: check if can scale in
         id: scale-in
-        if: steps.delta.outputs.scale-in
+        if: steps.delta.outputs.scale-in > 0
         run: |
           echo ::set-output name=can_scale::'true'
           echo ::set-output name=desired_capacity::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1)
@@ -80,7 +80,7 @@ jobs:
 
       - name: check if can scale out
         id: scale-out
-        if: steps.delta.outputs.scale-out
+        if: steps.delta.outputs.scale-out > 0
         run: |
           echo ::set-output name=can_scale::'true'
           echo ::set-output name=desired_capacity::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} + 1)
