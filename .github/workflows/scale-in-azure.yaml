@@ -15,7 +15,7 @@ jobs:
     steps:
 
       - name: initialize can_scale variable
-        run: echo ::set-output name=can_scale::"false"
+        run: echo ::set-output name=can_scale::'false'
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -71,14 +71,14 @@ jobs:
         if: steps.check_scale.outputs.desired_capacity > 0
         run: |
           echo "CAN scale in..."
-          echo ::set-output name=can_scale::"true"
+          echo ::set-output name=can_scale::'true'
 
       - name: can't scale
         if: steps.check_scale.outputs.desired_capacity <= 0
         run: echo "CANNOT scale in becuase the desired capacity of ${{ steps.check_scale.outputs.desired_capacity }} is less than the minimum size of ${{ steps.bigip_scaling.outputs.bigip_min }}"
 
   scale:
-    if: ${{ needs.build.outputs.can_scale }} == "false"
+    if: ${{ needs.build.outputs.can_scale }} == 'false'
     runs-on: ubuntu-latest
     env:
       ACTIONS_ALLOW_UNSECURE_COMMANDS: true
