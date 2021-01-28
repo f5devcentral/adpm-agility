@@ -69,7 +69,7 @@ jobs:
         # if: github.event.client_payload.scaling_type == 'in' && ((expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1) > 0)
         id: check_scale
         run: |
-          echo expr(${{ steps.student_data.outputs.bigip_instance_count }} - ${{ steps.bigip_scaling.outputs.bigip_min }})
+          echo $(expr(${{ steps.student_data.outputs.bigip_instance_count }} - ${{ steps.bigip_scaling.outputs.bigip_min }}))
           echo "this is the result $(expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1) > 0"
           echo "YES!"
           echo ::set-output name=desired_capacity::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1)
