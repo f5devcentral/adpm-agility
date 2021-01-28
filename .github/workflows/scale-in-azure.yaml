@@ -59,13 +59,17 @@ jobs:
       - name: output student data
         run: echo "The current BIG-IP instance count for student ${{ steps.client_payload_data.outputs.student_nbr }} is ${{ steps.student_data.outputs.bigip_instance_count }}"
 
+      - name: calculate difference
+        id: delta
+        run: |
+          echo ::set-output name=scale-in-delta::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1)
+          echo ::set-output name=scale-out-delta::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} + 1)
+
       - name: check if can scale in
         # if: github.event.client_payload.scaling_type == 'in' && ((expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1) > 0)
-        if: $(expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1) > 0
- #       if: 0 > 1
         id: check_scale
         run: |
-          echo $(expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1) > 0
+          echo $(expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1) => ${{ steps.bigip_scaling.outputs.bigip_max }}
           echo "this is the result $(expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1) > 0"
           echo "YES!"
           echo ::set-output name=desired_capacity::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1)
