@@ -71,6 +71,22 @@ jobs:
           echo "this is the scale out value = ${{ steps.delta.outputs.scale-out }}"
 
       - name: check if can scale in
+        id: scale-in
+        if: steps.delta.outputs.scale-in
+        run: |
+          echo ::set-output name=can_scale::'true'
+          echo ::set-output name=desired_capacity::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1)
+          echo "CAN SCALE IN!"
+
+      - name: check if can scale out
+        id: scale-out
+        if: steps.delta.outputs.scale-out
+        run: |
+          echo ::set-output name=can_scale::'true'
+          echo ::set-output name=desired_capacity::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} + 1)
+          echo "CAN SCALE OUT!"
+
+      - name: check if can scale in
         # if: github.event.client_payload.scaling_type == 'in' && ((expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1) > 0)
         id: check_scale
         run: |
