@@ -61,8 +61,13 @@ jobs:
 
       - name: check if can scale in
         if: github.event.client_payload == 'in' && ((expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1) > 0)
-        id: check_scale
+        id: check_scale_in
         run: echo ::set-output name=desired_capacity::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1)
+      
+      - name: check if can scale out
+        if: github.event.client_payload == 'out'
+        id: check_scale_out
+        run: echo ::set-output name=desired_capacity::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} + 1)
 
       - name: output desired capacity
         run: echo "This is the new desired capacity = ${{ steps.check_scale.outputs.desired_capacity }}"
