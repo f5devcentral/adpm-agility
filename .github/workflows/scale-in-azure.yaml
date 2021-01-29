@@ -9,7 +9,7 @@ jobs:
     name: build
     runs-on: ubuntu-latest
     outputs:
-      can_scale: ${{ steps.check_scale.outputs.can_scale }}
+      can_scale_in: ${{ steps.check_scale.outputs.can_scale }}
       desired_capacity: ${{ steps.check_scale.outputs.desired_capacity }}
       student_nbr: ${{ steps.client_payload_data.outputs.student_nbr }}
       current_count: ${{ steps.student_data.outputs.bigip_instance_count }}
@@ -99,6 +99,14 @@ jobs:
           echo "This is the desired_capacity variable from build step = ${{ needs.build.outputs.desired_capacity }}"
           echo "this is the student number = ${{ needs.build.outputs.student_nbr }}"
           echo "this is the scaling_type = ${{ needs.build.outputs.scaling_direction }}"
+      
+      - name: scaling in 
+        if: ${{ needs.build.outputs.scaling_direction }} == 'in'
+        run: echo "scaling in"
+
+      - name: scaling out
+        if: ${{ needs.build.outputs.scaling_direction }} == 'out'
+        run: echo "scaling in"
 
       - name: login to azure
         uses: azure/login@v1
