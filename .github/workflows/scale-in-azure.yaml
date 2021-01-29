@@ -86,7 +86,7 @@ jobs:
         env: 
           DIRECTION: "${{ github.event.client_payload.scaling_direction }}"
         run: |
-          if "${DIRECTION}" == "in"; then
+          if ${DIRECTION} == "in"; then
             echo "DIRECTION IS IN"
           else
             echo "DIRECTION IS OUT"
