@@ -19,10 +19,7 @@ output f5_username {
 }
 
 output bigip_password {
-  description = <<-EOT
- "Password for bigip user ( if dynamic_password is choosen it will be random generated password or if azure_keyvault is choosen it will be key vault secret name )
-  EOT
-  value       = var.az_key_vault_authentication ? data.azurerm_key_vault_secret.bigip_admin_password[0].name : random_string.password.result
+  value       = local.upass 
 }
 
 output onboard_do {

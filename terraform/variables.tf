@@ -110,7 +110,21 @@ variable script_name {
   default = "f5_onboard"
 }
 
+variable "dns_server" { default = "8.8.8.8" }
+variable "ntp_server" { default = "0.us.pool.ntp.org" }
+variable "timezone" { default = "UTC" }
+variable "ext_gw" { default = "10.2.2.1"}
 
+variable "app" {default = "app1" }
+variable "backend01ext" { default = "10.2.2.101" }
+
+variable "tls_cert" {default = ""}       
+variable "tls_key" {default = ""} 
+variable "cipherText" {default = ""}
+variable "protectedVal" {default = ""}
+
+variable "splunkIP" {default = "10.2.1.150"}
+variable "splunkPort" {default = "8088"}
 
 ## Please check and update the latest DO URL from https://github.com/F5Networks/f5-declarative-onboarding/releases
 # always point to a specific version in order to avoid inadvertent configuration inconsistency

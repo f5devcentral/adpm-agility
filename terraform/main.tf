@@ -36,7 +36,9 @@ locals {
     "internal_subnet_ids"        = var.internal_subnet_ids
     "internal_securitygroup_ids" = var.internal_securitygroup_ids
   }
- 
+  
+  upass = random_string.password.result
+
   mgmt_public_subnet_id = [
     for subnet in local.bigip_map["mgmt_subnet_ids"] :
     subnet["subnet_id"]
@@ -204,21 +206,6 @@ resource random_string password {
   min_lower   = 1
   min_numeric = 1
   special     = false
-}
-
-data "template_file" "init_file" {
-  template = "${file("${path.module}/${var.script_name}.tpl")}"
-  vars = {
-    onboard_log    = var.onboard_log
-    libs_dir       = var.libs_dir
-    DO_URL         = var.doPackageUrl
-    AS3_URL        = var.as3PackageUrl
-    TS_URL         = var.tsPackageUrl
-    FAST_URL       = var.fastPackageUrl
-    CFE_URL        = var.cfePackageUrl
-    bigip_username = var.f5_username
-    bigip_password = var.az_key_vault_authentication ? data.azurerm_key_vault_secret.bigip_admin_password[0].value : random_string.password.result
-  }
 }
 
 # Create a Public IP for bigip
@@ -391,6 +378,12 @@ resource "azurerm_network_interface_security_group_association" "internal_securi
   network_security_group_id = local.internal_private_security_id[count.index]
 }
 
+
+locals {
+  # Ids for multiple sets of EC2 instances, merged together
+  hostname    = format("bigip.azure.%s.com", local.student_id)
+}
+
 # Create F5 BIGIP1
 resource "azurerm_virtual_machine" "f5vm" {
   name                         = "${local.instance_prefix}-f5vm"
@@ -424,7 +417,7 @@ resource "azurerm_virtual_machine" "f5vm" {
   os_profile {
     computer_name  = "${local.instance_prefix}-f5vm01"
     admin_username = var.f5_username
-    admin_password = var.az_key_vault_authentication ? data.azurerm_key_vault_secret.bigip_admin_password[0].value : random_string.password.result
+    admin_password = local.upass
     #custom_data    = data.template_file.f5_bigip_onboard.rendered
   }
   os_profile_linux_config {
@@ -481,7 +474,7 @@ data "template_file" "clustermemberDO2" {
   count    = local.total_nics == 2 ? 1 : 0
   template = file("${path.module}/onboard_do_2nic.tpl")
   vars = {
-    hostname      = data.azurerm_public_ip.f5vm01mgmtpip.fqdn
+    hostname      = local.hostname
     name_servers  = join(",", formatlist("\"%s\"", ["168.63.129.16"]))
     search_domain = "f5.com"
     ntp_servers   = join(",", formatlist("\"%s\"", ["0.pool.ntp.org", "1.pool.ntp.org", "2.pool.ntp.org"]))
