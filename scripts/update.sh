@@ -1,2 +1,2 @@
-cd ../bigip_2nic_deploy/
-terraform apply --auto-approve
+cd ../terraform/bigip_2nic_deploy/
+terraform init && terraform apply --auto-approve
