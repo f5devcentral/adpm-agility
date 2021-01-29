@@ -8,6 +8,9 @@ jobs:
   build:
     name: build
     runs-on: ubuntu-latest
+    env:
+     ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+
     outputs:
       can_scale: ${{ steps.check_scale.outputs.can_scale }}
       desired_capacity: ${{ steps.check_scale.outputs.desired_capacity }}
