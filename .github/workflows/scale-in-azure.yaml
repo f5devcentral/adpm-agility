@@ -13,6 +13,7 @@ jobs:
       desired_capacity: ${{ steps.check_scale.outputs.desired_capacity }}
       student_nbr: ${{ steps.client_payload_data.outputs.student_nbr }}
       current_count: ${{ steps.student_data.outputs.bigip_instance_count }}
+      scaling_direction: ${{ github.event.client_payload.scaling_direction }}
     steps:
 
       - name: initialize can_scale variable
@@ -96,7 +97,8 @@ jobs:
         run: |
           echo "This is the can_scale variable from build step = ${{ needs.build.outputs.can_scale }}"
           echo "This is the desired_capacity variable from build step = ${{ needs.build.outputs.desired_capacity }}"
-          echo "this is the student number = ${{ needs.build.outputs.student_nbr }} "
+          echo "this is the student number = ${{ needs.build.outputs.student_nbr }}"
+          echo "this is the scaling_type = ${{ needs.build.outputs.scaling_event_type }}
 
       - name: login to azure
         uses: azure/login@v1
