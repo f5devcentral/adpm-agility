@@ -66,7 +66,7 @@ jobs:
         run: |
           echo ::set-output name=scale-in::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - ${{ steps.bigip_scaling.outputs.bigip_min }})
           echo ::set-output name=scale-out::$(expr ${{ steps.bigip_scaling.outputs.bigip_max }} - ${{ steps.student_data.outputs.bigip_instance_count }} + 1 )
-          export TEST="howdy"
+          sh export TEST="howdy"
 
       - name: output deltas
         run: |
@@ -80,6 +80,18 @@ jobs:
         run: |
           echo ::set-output name=can_scale::'true'
           echo "CAN SCALE IN or OUT!"
+      
+      - name: use env
+        env: 
+          DIRECTION: ${{ github.event.client_payload.scaling_direction }}
+        run: 
+          if $DIRECTION == 'in'; then
+            echo "DIRECTION IS IN"
+          else
+            echo "DIRECTION IS OUT"
+          fi
+
+
 
       - name: can't scale
         if: steps.check_scale.outputs.can_scale != 'true'
