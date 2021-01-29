@@ -84,7 +84,7 @@ jobs:
       
       - name: use env
         env: 
-          SCALE_UP: "${{ github.event.client_payload.scaling_direction }}"
+          DIRECTION: "${{ github.event.client_payload.scaling_direction }}"
         run: |
           echo $DIRECTION
           if [[ $DIRECTION = 'in' ]]; then
