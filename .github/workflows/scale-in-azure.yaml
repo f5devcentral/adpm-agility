@@ -83,17 +83,21 @@ jobs:
           echo "CAN SCALE IN or OUT!"
       
       - name: use env
+        id: test
         env: 
           DIRECTION: "${{ github.event.client_payload.scaling_direction }}"
         run: |
           echo $DIRECTION
           if [[ $DIRECTION = 'in' ]]; then
+            echo "::set-env name=direction::in"
             echo "DIRECTION IS IN"
           else
+            echo "::set-env name=direction::out"
             echo "DIRECTION IS OUT"
           fi
 
-
+      - name: output direction environment variable
+        run: echo "this is the direction ${{ env.direction }}"
 
       - name: can't scale
         if: steps.check_scale.outputs.can_scale != 'true'
