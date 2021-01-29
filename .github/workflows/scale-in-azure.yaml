@@ -83,7 +83,7 @@ jobs:
         run: echo "CANNOT scale to the desired capacity" 
 
   scale:
-    if: needs.check_scale.outputs.can_scale == 'true'
+    if: needs.can_scale.outputs.can_scale == 'true'
     runs-on: ubuntu-latest
     env:
       ACTIONS_ALLOW_UNSECURE_COMMANDS: true
