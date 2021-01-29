@@ -93,11 +93,15 @@ jobs:
             echo "DIRECTION IS IN"
           else
             echo "::set-env name=direction::out"
+            echo "::set-output name=direction::out"
             echo "DIRECTION IS OUT"
           fi
 
       - name: output direction environment variable
-        run: echo "this is the direction ${{ env.direction }}"
+        run: |
+          echo "this is the direction env value ${{ env.direction }}"
+          echo "this is the direction output value ${{ steps.test.outputs.direction }}s"
+
 
       - name: can't scale
         if: steps.check_scale.outputs.can_scale != 'true'
