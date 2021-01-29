@@ -99,6 +99,7 @@ jobs:
           echo "This is the desired_capacity variable from build step = ${{ needs.build.outputs.desired_capacity }}"
           echo "this is the student number = ${{ needs.build.outputs.student_nbr }}"
           echo "this is the scaling_type = ${{ needs.build.outputs.scaling_direction }}"
+          echo "this is the current count = ${{ needs.build.outputs.current_count }}"
       
       - name: scaling in 
         if: ${{ needs.build.outputs.scaling_direction }} == 'in'
