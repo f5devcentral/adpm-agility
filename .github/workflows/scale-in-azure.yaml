@@ -66,11 +66,13 @@ jobs:
         run: |
           echo ::set-output name=scale-in::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - ${{ steps.bigip_scaling.outputs.bigip_min }})
           echo ::set-output name=scale-out::$(expr ${{ steps.bigip_scaling.outputs.bigip_max }} - ${{ steps.student_data.outputs.bigip_instance_count }} + 1 )
+          export TEST="howdy"
 
       - name: output deltas
         run: |
           echo "this is the scale in value = ${{ steps.delta.outputs.scale-in }}"
           echo "this is the scale out value = ${{ steps.delta.outputs.scale-out }}"
+          echo $TEST
 
       - name: check if can scale in
         id: check_scale 
