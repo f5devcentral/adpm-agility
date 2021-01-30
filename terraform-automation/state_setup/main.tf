@@ -1,11 +1,7 @@
-resource random_id id {
-  byte_length = 2
-}
-
 data "template_file" "main_file" {
   template = file("../student_backend/main.tpl")
   vars = {
-    student_id = random_id.id.hex
+    student_id = var.student_id
   }
 }
 
@@ -15,21 +11,22 @@ resource "local_file" "main" {
 }
 
 data "template_file" "backend_file" {
-  template = file("../bigip_2nic_deploy/backend.tpl")
+  template = file("../deploy/backend.tpl")
   vars = {
-    student_id = random_id.id.hex
+    student_id = var.student_id
+    instance_count = var.instance_count
   }
 }
 
 resource "local_file" "backend" {
   content  = data.template_file.backend_file.rendered
-  filename = "../bigip_2nic_deploy/backend.tf"
+  filename = "../deploy/backend.tf"
 }
 
 data "template_file" "studentid_file" {
   template = file("../studentid.tpl")
   vars = {
-    student_id = random_id.id.hex
+    student_id = var.student_id
   }
 }
 

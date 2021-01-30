@@ -15,7 +15,7 @@ resource "local_file" "main" {
 }
 
 data "template_file" "backend_file" {
-  template = file("../bigip_2nic_deploy/backend.tpl")
+  template = file("../deploy/backend.tpl")
   vars = {
     student_id = random_id.id.hex
   }
@@ -23,7 +23,7 @@ data "template_file" "backend_file" {
 
 resource "local_file" "backend" {
   content  = data.template_file.backend_file.rendered
-  filename = "../bigip_2nic_deploy/backend.tf"
+  filename = "../deploy/backend.tf"
 }
 
 data "template_file" "studentid_file" {

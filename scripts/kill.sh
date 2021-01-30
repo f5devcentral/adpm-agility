@@ -1,4 +1,4 @@
-cd ../terraform/bigip_2nic_deploy/
+cd ../terraform/deploy/
 terraform init && terraform destroy --auto-approve
 
 cd ../student_backend/

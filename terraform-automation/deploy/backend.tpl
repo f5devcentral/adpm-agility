@@ -16,4 +16,5 @@ data "terraform_remote_state" "state" {
 
 locals{
     student_id  = "${student_id}"
+    instance_count = ${instance_count}
 }

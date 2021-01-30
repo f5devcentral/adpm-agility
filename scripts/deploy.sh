@@ -6,5 +6,5 @@ cd ../student_backend/
 terraform init && terraform plan && terraform apply --auto-approve
 sleep 10s
 
-cd ../bigip_2nic_deploy/
+cd ../deploy/
 terraform init && terraform plan && terraform apply --auto-approve
