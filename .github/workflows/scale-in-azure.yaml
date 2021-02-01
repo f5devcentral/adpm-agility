@@ -176,10 +176,10 @@ jobs:
         run: terraform init ./terraform-automation/state_setup
       
       - name: terraform plan state_setup
-        run: terraform plan ./terraform-automation/state_setup -var 'instance_count=${{ needs.build.outputs.desired_capacity }}' -var 'student_id=${{ needs.build.outputs.student_nbr }}'
+        run: terraform plan -var 'instance_count=${{ needs.build.outputs.desired_capacity }}' -var 'student_id=${{ needs.build.outputs.student_nbr }}' ./terraform-automation/state_setup
        
       - name: terraform apply state_setup
-        run: terraform apply --auto-approve ./terraform-automation/state_setup -var 'instance_count=${{ needs.build.outputs.desired_capacity }}' -var 'student_id=${{ needs.build.outputs.student_nbr }}'
+        run: terraform apply --auto-approve -var 'instance_count=${{ needs.build.outputs.desired_capacity }}' -var 'student_id=${{ needs.build.outputs.student_nbr }}' ./terraform-automation/state_setup
     
       - name: terraform init deploy
         run: terraform init ./terraform-automation/deploy
