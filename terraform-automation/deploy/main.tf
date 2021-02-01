@@ -26,7 +26,7 @@ resource azurerm_resource_group rg {
 #Create N-nic bigip
 #
 module bigip {
-  count 		     = var.instance_count
+  count 		     = local.instance_count
   source                     = "../"
   prefix                     = format("%s-2nic", var.prefix)
   resource_group_name        = azurerm_resource_group.rg.name
@@ -40,7 +40,7 @@ module bigip {
 
 resource "null_resource" "clusterDO" {
 
-  count = var.instance_count
+  count = local.instance_count
 
   provisioner "local-exec" {
     command = "cat > DO_2nic-instance${count.index}.json <<EOL\n ${module.bigip[count.index].onboard_do}\nEOL"

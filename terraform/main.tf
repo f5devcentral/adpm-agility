@@ -478,7 +478,7 @@ data "template_file" "clustermemberDO2" {
     name_servers  = join(",", formatlist("\"%s\"", ["168.63.129.16"]))
     search_domain = "f5.com"
     ntp_servers   = join(",", formatlist("\"%s\"", ["0.pool.ntp.org", "1.pool.ntp.org", "2.pool.ntp.org"]))
-    vlan-name     = "${element(split("/", local.vlan_list[0]), length(split("/", local.vlan_list[0])) - 1)}"
+    vlan-name     = element(split("/", local.vlan_list[0]), length(split("/", local.vlan_list[0])) - 1)
     self-ip       = local.selfip_list[0]
     gateway       = join(".", concat(slice(split(".",local.gw_bytes_nic),0,3),[1]) )
   }

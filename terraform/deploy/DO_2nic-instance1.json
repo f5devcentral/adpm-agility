@@ -7,7 +7,7 @@
         "class": "Tenant",
         "mySystem": {
                 "class": "System",
-                "hostname": "bigip.azure.4bd3.com"
+                "hostname": "bigip.azure.b6be.com"
             },
     "myDns": {
         "class": "DNS",

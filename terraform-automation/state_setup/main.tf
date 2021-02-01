@@ -1,15 +1,3 @@
-data "template_file" "main_file" {
-  template = file("../student_backend/main.tpl")
-  vars = {
-    student_id = var.student_id
-  }
-}
-
-resource "local_file" "main" {
-  content  = data.template_file.main_file.rendered
-  filename = "../student_backend/main.tf"
-}
-
 data "template_file" "backend_file" {
   template = file("../deploy/backend.tpl")
   vars = {
