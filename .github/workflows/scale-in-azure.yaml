@@ -159,18 +159,31 @@ jobs:
       - name: output terraform version
         run: terraform version
 
-      # - name: process template file using jinja2
-      #   uses: cuchi/jinja2-action@v1.2.0
-      #   with:
-      #     template: ./terraform/github_actions/outputs.tpl
-      #     output_file: ./terraform/github_actions/outputs.tf
-      #     variables: |
-      #       student_id=${{ needs.build.outputs.student_id }}
-      #       client_id=${{ secrets.AZURE_CLIENT_ID }}
-      #       subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      #       tenant_id=${{ secrets.AZURE_TENANT_ID }}
-      #       client_secret=${{ secrets.AZURE_CLIENT_SECRET }}
+      - name: process template file using jinja2
+        uses: cuchi/jinja2-action@v1.2.0
+        with:
+          template: ./terraform-automations/initialize_azure/initialize_azure.tpl
+          output_file: ./terraform-automations/initialize_azure/main.tf
+          variables: |
+            client_id=${{ secrets.AZURE_CLIENT_ID }}
+            subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}
+            tenant_id=${{ secrets.AZURE_TENANT_ID }}
+            client_secret=${{ secrets.AZURE_CLIENT_SECRET }}
 
+      - name: terraform init initialize azure
+        run: |
+          cd ./terraform-automations/initialize_azure
+          terraform init
+
+      - name: terraform plan initialize azure
+        run: |
+          cd ./terraform-automations/initialize_azure
+          terraform plan
+
+      - name: terraform apply initialize azure
+        run: |
+          cd ./terraform-automations/initialize_azure
+          terraform apply --auto-approve      
 
       - name: terraform init state_setup
         run: |
