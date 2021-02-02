@@ -129,11 +129,11 @@ jobs:
           echo "this is the current count = ${{ needs.build.outputs.current_count }}"
       
       - name: scaling in 
-        if: ${{ needs.build.outputs.scaling_direction }} == "in"
+        if: needs.build.outputs.scaling_direction == "in"
         run: echo "scaling in"
 
       - name: scaling out
-        if: ${{ needs.build.outputs.scaling_direction }} == "out"
+        if: needs.build.outputs.scaling_direction == "out"
         run: echo "scaling out"
 
       - name: login to azure
