@@ -97,7 +97,7 @@ variable enable_accelerated_networking {
 variable enable_ssh_key {
   type        = bool
   description = "(Optional) Enable ssh key authentication in Linux virtual Machine"
-  default     = false
+  default     = true
 }
 
 variable script_name {
