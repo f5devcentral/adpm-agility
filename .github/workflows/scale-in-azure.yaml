@@ -172,17 +172,17 @@ jobs:
 
       - name: terraform init initialize azure
         run: |
-          cd ./terraform-automation/initialize_azure
+          cd ./terraform-automation/azure_rm
           terraform init
 
       - name: terraform plan initialize azure
         run: |
-          cd ./terraform-automation/initialize_azure
+          cd ./terraform-automation/azure_rm
           terraform plan
 
       - name: terraform apply initialize azure
         run: |
-          cd ./terraform-automation/initialize_azure
+          cd ./terraform-automation/azure_rm
           terraform apply --auto-approve      
 
       - name: terraform init state_setup
