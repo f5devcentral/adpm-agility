@@ -169,6 +169,9 @@ jobs:
             subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}
             tenant_id=${{ secrets.AZURE_TENANT_ID }}
             client_secret=${{ secrets.AZURE_CLIENT_SECRET }}
+      
+      - name: install azure cli client
+        run: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
       - name: terraform init initialize azure
         run: |
