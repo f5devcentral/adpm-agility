@@ -14,7 +14,7 @@ jobs:
     outputs:
       can_scale: ${{ steps.check_scale.outputs.can_scale }}
       desired_capacity: ${{ steps.test.outputs.new_count }}
-      student_nbr: ${{ steps.client_payload_data.outputs.student_nbr }}
+      student_id: ${{ steps.client_payload_data.outputs.student_id }}
       current_count: ${{ steps.student_data.outputs.bigip_instance_count }}
       scaling_direction: ${{ github.event.client_payload.scaling_direction }}
     steps:
@@ -34,10 +34,10 @@ jobs:
       - name: parse client payload data for scaling
         id: client_payload_data
         run: |
-          echo ::set-output name=student_nbr::${{ github.event.client_payload.studentNbr }}
+          echo ::set-output name=student_id::${{ github.event.client_payload.student_id }}
 
       - name: output student number
-        run: echo "This is the student number ${{ steps.client_payload_data.outputs.student_nbr }}"
+        run: echo "This is the student number ${{ steps.client_payload_data.outputs.student_id }}"
 
       - name: install consul client
         run: sudo sh scripts/consul.sh
@@ -59,10 +59,10 @@ jobs:
 
       - name: query student data
         id: student_data
-        run: echo ::set-output name=bigip_instance_count::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.outputs.student_nbr }}/scaling/bigip/current_count)
+        run: echo ::set-output name=bigip_instance_count::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.outputs.student_id }}/scaling/bigip/current_count)
 
       - name: output student data
-        run: echo "The current BIG-IP instance count for student ${{ steps.client_payload_data.outputs.student_nbr }} is ${{ steps.student_data.outputs.bigip_instance_count }}"
+        run: echo "The current BIG-IP instance count for student ${{ steps.client_payload_data.outputs.student_id }} is ${{ steps.student_data.outputs.bigip_instance_count }}"
 
       - name: calculate difference
         id: delta
@@ -124,7 +124,7 @@ jobs:
         run: |
           echo "This is the can_scale variable from build step = ${{ needs.build.outputs.can_scale }}"
           echo "This is the desired_capacity variable from build step = ${{ needs.build.outputs.desired_capacity }}"
-          echo "this is the student number = ${{ needs.build.outputs.student_nbr }}"
+          echo "this is the student number = ${{ needs.build.outputs.student_id }}"
           echo "this is the scaling_type = ${{ needs.build.outputs.scaling_direction }}"
           echo "this is the current count = ${{ needs.build.outputs.current_count }}"
       
@@ -165,7 +165,7 @@ jobs:
       #     template: ./terraform/github_actions/outputs.tpl
       #     output_file: ./terraform/github_actions/outputs.tf
       #     variables: |
-      #       student_nbr=${{ needs.build.outputs.student_nbr }}
+      #       student_id=${{ needs.build.outputs.student_id }}
       #       client_id=${{ secrets.AZURE_CLIENT_ID }}
       #       subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}
       #       tenant_id=${{ secrets.AZURE_TENANT_ID }}
@@ -180,12 +180,12 @@ jobs:
       - name: terraform plan state_setup
         run: |
           cd /terraform-automation/state_setup
-          terraform plan -var 'instance_count=${{ needs.build.outputs.desired_capacity }}' -var 'student_id=${{ needs.build.outputs.student_nbr }}' 
+          terraform plan -var 'instance_count=${{ needs.build.outputs.desired_capacity }}' -var 'student_id=${{ needs.build.outputs.student_id }}' 
        
       - name: terraform apply state_setup
         run: |
           cd /terraform-automation/state_setup
-          terraform apply --auto-approve -var 'instance_count=${{ needs.build.outputs.desired_capacity }}' -var 'student_id=${{ needs.build.outputs.student_nbr }}' 
+          terraform apply --auto-approve -var 'instance_count=${{ needs.build.outputs.desired_capacity }}' -var 'student_id=${{ needs.build.outputs.student_id }}' 
     
       - name: terraform init deploy
         run: |
