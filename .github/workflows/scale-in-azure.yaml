@@ -174,30 +174,30 @@ jobs:
 
       - name: terraform init state_setup
         run: |
-          cd /terraform-automation/state_setup
+          cd ./terraform-automation/state_setup
           terraform init
       
       - name: terraform plan state_setup
         run: |
-          cd /terraform-automation/state_setup
+          cd ./terraform-automation/state_setup
           terraform plan -var 'instance_count=${{ needs.build.outputs.desired_capacity }}' -var 'student_id=${{ needs.build.outputs.student_id }}' 
        
       - name: terraform apply state_setup
         run: |
-          cd /terraform-automation/state_setup
+          cd ./terraform-automation/state_setup
           terraform apply --auto-approve -var 'instance_count=${{ needs.build.outputs.desired_capacity }}' -var 'student_id=${{ needs.build.outputs.student_id }}' 
     
       - name: terraform init deploy
         run: |
-          cd /terraform-automation/deploy
+          cd ./terraform-automation/deploy
           terraform init 
       
       - name: terraform plan deploy
         run: |
-          cd /terraform-automation/deploy
+          cd ./terraform-automation/deploy
           terraform plan 
        
       - name: terraform apply deploy
         run: |
-          cd /terraform-automation/deploy
+          cd ./terraform-automation/deploy
           terraform apply --auto-approve 
