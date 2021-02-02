@@ -94,11 +94,12 @@ jobs:
             echo "DIRECTION IS IN"
             echo "::set-output name=new_count::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1)"
             echo ::set-output name=can_scale::'true'
-          else
+          elif [[ $DIRECTION == 'out' ]]  && [[ ${{ steps.delta.outputs.scale-out }} > 0 ]]; then
             echo "::set-env name=direction::out"
             echo "::set-output name=direction::out"
             echo "DIRECTION IS OUT"
             echo "::set-output name=new_count::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} + 1)"
+            echo ::set-output name=can_scale::'true'
           fi
 
       - name: output direction environment variable
@@ -106,6 +107,7 @@ jobs:
           echo "this is the direction env value ${{ env.direction }}"
           echo "this is the direction output value ${{ steps.test.outputs.direction }}"
           echo "this is the new instance count = ${{ steps.test.outputs.new_count }}"
+          echo "this is the value of the can_scale variable = ${{ steps.test.outputs.can_scale }}"
 
 
       - name: can't scale
