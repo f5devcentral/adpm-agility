@@ -12,7 +12,7 @@ jobs:
      ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
 
     outputs:
-      can_scale: ${{ steps.check_scale.outputs.can_scale }}
+      can_scale: ${{ steps.test.outputs.can_scale }}
       desired_capacity: ${{ steps.test.outputs.new_count }}
       student_id: ${{ steps.client_payload_data.outputs.student_id }}
       current_count: ${{ steps.student_data.outputs.bigip_instance_count }}
@@ -115,7 +115,7 @@ jobs:
         run: echo "CANNOT scale to the desired capacity" 
 
   scale:
-    if: 0 == 1
+    if: needs.build.outputs.can_scale == 'true'
     runs-on: ubuntu-latest
     env:
       ACTIONS_ALLOW_UNSECURE_COMMANDS: true
