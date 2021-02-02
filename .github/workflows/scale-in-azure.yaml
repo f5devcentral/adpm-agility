@@ -89,7 +89,7 @@ jobs:
         run: |
           echo $DIRECTION
           echo ::set-output name=can_scale::'false'
-          if [[ $DIRECTION ]] = 'in' && ${{ steps.delta.outputs.scale-in }} > 0; then
+          if [[ $DIRECTION ]] == 'in' && ${{ steps.delta.outputs.scale-in }} > 0; then
             echo "::set-env name=direction::in"
             echo "DIRECTION IS IN"
             echo "::set-output name=new_count::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1)"
