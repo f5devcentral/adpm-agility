@@ -162,8 +162,8 @@ jobs:
       - name: process template file using jinja2
         uses: cuchi/jinja2-action@v1.2.0
         with:
-          template: ./terraform-automations/initialize_azure/initialize_azure.tpl
-          output_file: ./terraform-automations/initialize_azure/main.tf
+          template: ./terraform-automations/azure_rm/azure_rm.tpl
+          output_file: ./terraform-automations/azure_rm/main.tf
           variables: |
             client_id=${{ secrets.AZURE_CLIENT_ID }}
             subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}
