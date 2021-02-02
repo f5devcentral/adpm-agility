@@ -162,31 +162,31 @@ jobs:
       - name: process template file using jinja2
         uses: cuchi/jinja2-action@v1.2.0
         with:
-          template: ./terraform-automation/azure_rm/azure_rm.tpl
-          output_file: ./terraform-automation/azure_rm/main.tf
+          template: ./terraform-automation/deploy/main.tpl
+          output_file: ./terraform-automation/deploy/main.tf
           variables: |
             client_id=${{ secrets.AZURE_CLIENT_ID }}
             subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}
             tenant_id=${{ secrets.AZURE_TENANT_ID }}
             client_secret=${{ secrets.AZURE_CLIENT_SECRET }}
       
-      - name: install azure cli client
-        run: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+      # - name: install azure cli client
+      #   run: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
-      - name: terraform init initialize azure
-        run: |
-          cd ./terraform-automation/azure_rm
-          terraform init
+      # - name: terraform init initialize azure
+      #   run: |
+      #     cd ./terraform-automation/azure_rm
+      #     terraform init
 
-      - name: terraform plan initialize azure
-        run: |
-          cd ./terraform-automation/azure_rm
-          terraform plan
+      # - name: terraform plan initialize azure
+      #   run: |
+      #     cd ./terraform-automation/azure_rm
+      #     terraform plan
 
-      - name: terraform apply initialize azure
-        run: |
-          cd ./terraform-automation/azure_rm
-          terraform apply --auto-approve      
+      # - name: terraform apply initialize azure
+      #   run: |
+      #     cd ./terraform-automation/azure_rm
+      #     terraform apply --auto-approve      
 
       - name: terraform init state_setup
         run: |
