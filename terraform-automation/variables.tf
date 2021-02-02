@@ -97,12 +97,7 @@ variable enable_accelerated_networking {
 variable enable_ssh_key {
   type        = bool
   description = "(Optional) Enable ssh key authentication in Linux virtual Machine"
-  default     = true
-}
-
-variable f5_ssh_publickey {
-  description = "Path to the public key to be used for ssh access to the VM.  Only used with non-Windows vms and can be left as-is even if using Windows vms. If specifying a path to a certification on a Windows machine to provision a linux vm use the / in the path versus backslash. e.g. c:/home/id_rsa.pub"
-  default     = "~/.ssh/id_rsa.pub"
+  default     = false
 }
 
 variable script_name {
