@@ -111,7 +111,7 @@ jobs:
 
 
       - name: can't scale
-        if: steps.check_scale.outputs.can_scale != 'true'
+        if: steps.test.outputs.can_scale != 'true'
         run: echo "CANNOT scale to the desired capacity" 
 
   scale:
