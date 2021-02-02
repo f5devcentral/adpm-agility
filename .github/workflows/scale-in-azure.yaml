@@ -13,7 +13,7 @@ jobs:
 
     outputs:
       can_scale: ${{ steps.check_scale.outputs.can_scale }}
-      desired_capacity: ${{ steps.check_scale.outputs.desired_capacity }}
+      desired_capacity: ${{ steps.test.outputs.new_count }}
       student_nbr: ${{ steps.client_payload_data.outputs.student_nbr }}
       current_count: ${{ steps.student_data.outputs.bigip_instance_count }}
       scaling_direction: ${{ github.event.client_payload.scaling_direction }}
@@ -159,26 +159,33 @@ jobs:
       - name: output terraform version
         run: terraform version
 
-      - name: process template file using jinja2
-        uses: cuchi/jinja2-action@v1.2.0
-        with:
-          template: ./terraform/github_actions/outputs.tpl
-          output_file: ./terraform/github_actions/outputs.tf
-          variables: |
-            student_nbr=${{ needs.build.outputs.student_nbr }}
-            client_id=${{ secrets.AZURE_CLIENT_ID }}
-            subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}
-            tenant_id=${{ secrets.AZURE_TENANT_ID }}
-            client_secret=${{ secrets.AZURE_CLIENT_SECRET }}
+      # - name: process template file using jinja2
+      #   uses: cuchi/jinja2-action@v1.2.0
+      #   with:
+      #     template: ./terraform/github_actions/outputs.tpl
+      #     output_file: ./terraform/github_actions/outputs.tf
+      #     variables: |
+      #       student_nbr=${{ needs.build.outputs.student_nbr }}
+      #       client_id=${{ secrets.AZURE_CLIENT_ID }}
+      #       subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      #       tenant_id=${{ secrets.AZURE_TENANT_ID }}
+      #       client_secret=${{ secrets.AZURE_CLIENT_SECRET }}
 
-      - name: show rendered terraform file
-        run: cat ./terraform/github_actions/outputs.tf
 
-      - name: terraform init
-        run: terraform init ./terraform/github_actions
-
-      - name: terraform plan
-        run: terraform plan ./terraform/github_actions
-
-      - name: terraform apply
-        run: terraform apply --auto-approve ./terraform/github_actions
+      - name: terraform init state_setup
+        run: terraform init ./terraform-automation/state_setup
+      
+      - name: terraform plan state_setup
+        run: terraform plan -var 'instance_count=${{ needs.build.outputs.desired_capacity }}' -var 'student_id=${{ needs.build.outputs.student_nbr }}' ./terraform-automation/state_setup
+       
+      - name: terraform apply state_setup
+        run: terraform apply --auto-approve -var 'instance_count=${{ needs.build.outputs.desired_capacity }}' -var 'student_id=${{ needs.build.outputs.student_nbr }}' ./terraform-automation/state_setup
+    
+      - name: terraform init deploy
+        run: terraform init ./terraform-automation/deploy
+      
+      - name: terraform plan deploy
+        run: terraform plan ./terraform-automation/deploy 
+       
+      - name: terraform apply deploy
+        run: terraform apply --auto-approve ./terraform-automation/deploy
