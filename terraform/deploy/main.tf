@@ -49,7 +49,7 @@ resource "azurerm_lb" "alb" {
 resource "azurerm_lb_backend_address_pool" "alb-backend" {
   resource_group_name = azurerm_resource_group.rg.name
   loadbalancer_id     = azurerm_lb.alb.id
-  name                = format("f5pool-%s%", local.student_id)
+  name                = format("f5pool-%s", local.student_id)
 }
 
 #
