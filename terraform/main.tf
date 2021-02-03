@@ -239,36 +239,6 @@ resource "azurerm_public_ip" "secondary_external_public_ip" {
   }
 }
 
-resource "azurerm_public_ip" "alb_public_ip" {
-  name                = "${local.instance_prefix}-alb-pip"
-  location            = data.azurerm_resource_group.bigiprg.location
-  resource_group_name = data.azurerm_resource_group.bigiprg.name
-  allocation_method   = "Static"
-  sku                 = "Standard"
-  zones             = var.availabilityZones
-}
-
-#
-# Create a load balancer for bigip(s)
-#
-resource "azurerm_lb" "alb" {
-  name                = "${local.instance_prefix}-alb-bigip"
-  location            = data.azurerm_resource_group.bigiprg.location
-  resource_group_name = data.azurerm_resource_group.bigiprg.name
-  sku                 = "Standard"
-
-  frontend_ip_configuration {
-    name                 = "PublicIPAddress"
-    public_ip_address_id = azurerm_public_ip.alb_public_ip.id
-  }
-}
-
-resource "azurerm_lb_backend_address_pool" "alb-backend" {
-  resource_group_name = data.azurerm_resource_group.bigiprg.name
-  loadbalancer_id     = azurerm_lb.alb.id
-  name                = "f5pool-${local.instance_prefix}"
-}
-
 # Deploy BIG-IP with N-Nic interface 
 resource "azurerm_network_interface" "mgmt_nic" {
   count               = length(local.bigip_map["mgmt_subnet_ids"])
@@ -433,7 +403,7 @@ resource "azurerm_virtual_machine" "f5vm" {
     Name   = "${local.instance_prefix}-f5vm01"
     source = "terraform"
   }
-  depends_on = [azurerm_network_interface_security_group_association.mgmt_security, azurerm_network_interface_security_group_association.internal_security, azurerm_network_interface_security_group_association.external_security, azurerm_network_interface_security_group_association.external_public_security, azurerm_public_ip.secondary_external_public_ip, azurerm_public_ip.mgmt_public_ip, azurerm_public_ip.alb_public_ip]
+  depends_on = [azurerm_network_interface_security_group_association.mgmt_security, azurerm_network_interface_security_group_association.internal_security, azurerm_network_interface_security_group_association.external_security, azurerm_network_interface_security_group_association.external_public_security, azurerm_public_ip.secondary_external_public_ip, azurerm_public_ip.mgmt_public_ip]
 }
 
 ## ..:: Run Startup Script ::..

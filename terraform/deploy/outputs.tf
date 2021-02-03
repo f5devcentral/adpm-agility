@@ -17,3 +17,8 @@ output mgmtPort {
 output hostname {
   value = local.hostname
 }
+
+output "alb_address" {
+  description = "Public endpoint for load balancing external app"
+  value       = azurerm_public_ip.alb_public_ip.ip_address
+}
