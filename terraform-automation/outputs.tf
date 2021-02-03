@@ -33,11 +33,6 @@ output "public_addresses" {
   value   = concat(azurerm_public_ip.secondary_external_public_ip.*.ip_address)
 }
 
-output "alb_address" {
-  description = "Public endpoint for load balancing external app"
-  value       = azurerm_public_ip.alb_public_ip.ip_address
-}
-
 output "external_nics" {
   description = "List of BIG-IP external nics"
   value   = concat(azurerm_network_interface.external_nic.*.id)
