@@ -20,4 +20,4 @@ variable availabilityZones {
 variable AllowedIPs {}
 
 
-
+variable upassword {default = "F5consul"}
