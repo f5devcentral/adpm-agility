@@ -27,7 +27,7 @@ resource "local_file" "backend" {
 }
 
 data "template_file" "studentid_file" {
-  template = file("../studentid.tpl")
+  template = file("../f5module/studentid.tpl")
   vars = {
     student_id = random_id.id.hex
   }
@@ -35,5 +35,5 @@ data "template_file" "studentid_file" {
 
 resource "local_file" "studentid" {
   content  = data.template_file.studentid_file.rendered
-  filename = "../studentid.tf"
+  filename = "../f5module/studentid.tf"
 }

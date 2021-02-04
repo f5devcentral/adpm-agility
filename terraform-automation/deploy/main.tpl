@@ -61,7 +61,7 @@ resource "azurerm_lb_backend_address_pool" "alb-backend" {
 #
 module bigip {
   count 		     = local.instance_count
-  source                     = "../"
+  source                     = "../f5module"
   prefix                     = format("%s-2nic", var.prefix)
   resource_group_name        = azurerm_resource_group.rg.name
   mgmt_subnet_ids            = [{ "subnet_id" = data.azurerm_subnet.mgmt.id, "public_ip" = true, "private_ip_primary" =  ""}]
