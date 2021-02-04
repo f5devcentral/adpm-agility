@@ -25,4 +25,16 @@ variable instance_count {
   default     = 2
 }
 
+variable app_count {
+  description = "Number of backend application instances to create( From terraform 0.13, module supports count feature to spin mutliple instances )"
+  type        = number
+  default     = 2
+}
 
+# TAGS
+variable "purpose" { default = "public" }
+variable "environment" { default = "f5env" } #ex. dev/staging/prod
+variable "owner" { default = "f5owner" }
+variable "group" { default = "f5group" }
+variable "costcenter" { default = "f5costcenter" }
+variable "application" { default = "f5app" }
