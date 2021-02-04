@@ -80,7 +80,7 @@ resource "azurerm_virtual_machine" "app" {
  os_profile {
    computer_name  = "appserver"
    admin_username = "xuser"
-   admin_password = "F5testnet!"
+   admin_password = "F5labnet!"
  }
 
  os_profile_linux_config {
