@@ -3,6 +3,11 @@ variable prefix {
   type        = string
 }
 
+variable backendpool_id {
+  description = "Id of backend alb pool"
+  type        = string
+}
+
 variable f5_username {
   description = "The admin username of the F5 Bigip that will be deployed"
   default     = "bigipuser"

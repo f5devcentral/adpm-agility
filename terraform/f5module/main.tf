@@ -164,7 +164,6 @@ locals {
     if private["public_ip"] == false
   ]
 
-
   internal_private_security_id = [
     for i in local.internal_private_index : local.bigip_map["internal_securitygroup_ids"][i]
   ]
@@ -447,3 +446,9 @@ data "template_file" "clustermemberDO2" {
   depends_on = [azurerm_network_interface.external_nic, azurerm_network_interface.external_public_nic, azurerm_network_interface.internal_nic]
 }
 
+resource "azurerm_network_interface_backend_address_pool_association" "example" {
+  count                   = length(local.external_private_security_id)
+  network_interface_id    = azurerm_network_interface.external_nic[count.index].id
+  ip_configuration_name   = "testconfiguration1"
+  backend_address_pool_id = var.backendpool_id
+}
