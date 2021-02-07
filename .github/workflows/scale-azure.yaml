@@ -17,6 +17,7 @@ jobs:
       student_id: ${{ steps.client_payload_data.outputs.student_id }}
       current_count: ${{ steps.student_data.outputs.bigip_instance_count }}
       scaling_direction: ${{ github.event.client_payload.scaling_direction }}
+      consul_server: ${{ steps.consul_params.outputs.consul_server }}
     steps:
 
       - name: Checkout
@@ -225,5 +226,5 @@ jobs:
         run: sudo sh scripts/consul.sh
 
       - name: update time on k/v store
-        run: consul kv put -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.outputs.student_id }}/scaling/bigip/last_modified_time date +"%Y%m%d.%H%M%S%2N"
+        run: echo date +"%Y%m%d.%H%M%S%2" | consul kv put -http-addr=${{ needs.build.outputs.consul_server }} adpm/labs/agility/students/${{ needs.build.outputs.student_id }}/scaling/bigip/last_modified_time -
 
