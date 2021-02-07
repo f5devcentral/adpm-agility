@@ -37,7 +37,7 @@ jobs:
         run: |
           echo "This is the student id ${{ steps.client_payload_data.outputs.student_id }}"
           echo "This is the student id from payload = ${{ github.event.client_payload.student_id }}"
-          
+
       - name: install consul client
         run: sudo sh scripts/consul.sh
 
@@ -220,3 +220,10 @@ jobs:
         run: |
           cd ./terraform-automation/deploy
           terraform apply --auto-approve 
+      
+      - name: install consul client
+        run: sudo sh scripts/consul.sh
+
+      - name: update time on k/v store
+        run: consul kv put -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.outputs.student_id }}/scaling/bigip/last_modified_time date +"%Y%m%d.%H%M%S%2N"
+
