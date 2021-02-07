@@ -1,8 +1,8 @@
-name: scale-in-azure
+name: scale-azure
 on:
   repository_dispatch:
     types:
-      - scale-in-azure
+      - scale-azure
 
 jobs:
   build:
@@ -13,14 +13,11 @@ jobs:
 
     outputs:
       can_scale: ${{ steps.test.outputs.can_scale }}
-      desired_capacity: ${{ steps.test.outputs.new_count }}
+      new_count: ${{ steps.test.outputs.new_count }}
       student_id: ${{ steps.client_payload_data.outputs.student_id }}
       current_count: ${{ steps.student_data.outputs.bigip_instance_count }}
       scaling_direction: ${{ github.event.client_payload.scaling_direction }}
     steps:
-
-      - name: initialize can_scale variable
-        run: echo ::set-output name=can_scale::'false'
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -36,8 +33,8 @@ jobs:
         run: |
           echo ::set-output name=student_id::${{ github.event.client_payload.student_id }}
 
-      - name: output student number
-        run: echo "This is the student number ${{ steps.client_payload_data.outputs.student_id }}"
+      - name: output student id
+        run: echo "This is the student id ${{ steps.client_payload_data.outputs.student_id }}"
 
       - name: install consul client
         run: sudo sh scripts/consul.sh
@@ -75,12 +72,12 @@ jobs:
           echo "this is the scale in value = ${{ steps.delta.outputs.scale-in }}"
           echo "this is the scale out value = ${{ steps.delta.outputs.scale-out }}"
 
-      - name: check if can scale in
-        id: check_scale 
-        if: steps.delta.outputs.scale-in > 0 || steps.delta.outputs.scale-out > 0
-        run: |
-          echo ::set-output name=can_scale::'true'
-          echo "CAN SCALE IN or OUT!"
+      # - name: check if can scale in
+      #   id: check_scale 
+      #   if: steps.delta.outputs.scale-in > 0 || steps.delta.outputs.scale-out > 0
+      #   run: |
+      #     echo ::set-output name=can_scale::'true'
+      #     echo "CAN SCALE IN or OUT!"
       
       - name: use env
         id: test
@@ -127,7 +124,7 @@ jobs:
       - name: output environment variable
         run: |
           echo "This is the can_scale variable from build step = ${{ needs.build.outputs.can_scale }}"
-          echo "This is the desired_capacity variable from build step = ${{ needs.build.outputs.desired_capacity }}"
+          echo "This is the new_count variable from build step = ${{ needs.build.outputs.new_count }}"
           echo "this is the student number = ${{ needs.build.outputs.student_id }}"
           echo "this is the scaling_type = ${{ needs.build.outputs.scaling_direction }}"
           echo "this is the current count = ${{ needs.build.outputs.current_count }}"
@@ -145,8 +142,8 @@ jobs:
       #   with:
       #     creds: ${{ secrets.AZURE_CREDS }}
 
-      - name: run azure command
-        run: az account list
+      # - name: run azure command
+      #   run: az account list
 
       # - name: output github secret info
       #   id: secret_info
@@ -200,12 +197,12 @@ jobs:
       - name: terraform plan state_setup
         run: |
           cd ./terraform-automation/state_setup
-          terraform plan -var 'instance_count=${{ needs.build.outputs.desired_capacity }}' -var 'student_id=${{ needs.build.outputs.student_id }}' 
+          terraform plan -var 'instance_count=${{ needs.build.outputs.new_count }}' -var 'student_id=${{ needs.build.outputs.student_id }}' 
        
       - name: terraform apply state_setup
         run: |
           cd ./terraform-automation/state_setup
-          terraform apply --auto-approve -var 'instance_count=${{ needs.build.outputs.desired_capacity }}' -var 'student_id=${{ needs.build.outputs.student_id }}' 
+          terraform apply --auto-approve -var 'instance_count=${{ needs.build.outputs.new_count }}' -var 'student_id=${{ needs.build.outputs.student_id }}' 
     
       - name: terraform init deploy
         run: |
