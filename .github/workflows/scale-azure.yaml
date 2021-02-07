@@ -226,5 +226,5 @@ jobs:
         run: sudo sh scripts/consul.sh
 
       - name: update time on k/v store
-        run: echo date +"%Y%m%d.%H%M%S%2" | consul kv put -http-addr=${{ needs.build.outputs.consul_server }} adpm/labs/agility/students/${{ needs.build.outputs.student_id }}/scaling/bigip/last_modified_time -
+        run: echo `date +"%Y%m%d.%H%M%S%2"` | consul kv put -http-addr=${{ needs.build.outputs.consul_server }} adpm/labs/agility/students/${{ needs.build.outputs.student_id }}/scaling/bigip/last_modified_time -
 
