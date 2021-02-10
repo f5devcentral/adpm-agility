@@ -10,15 +10,19 @@
       "class": "Telemetry_Listener",
       "port": 6514
   },
-  "My_Consumer": {
-      "class": "Telemetry_Consumer",
-      "type": "Splunk",
-      "host": "${splunkIP}",
-      "protocol": "https",
-      "port": ${splunkPort},
-      "allowSelfSignedCert": true,
-      "passphrase": {
-          "cipherText": "c5baa9b3-82c7-4af8-8b7d-40052390d298"
-      }
-  }
+  "My_ELK_Consumer": {
+    "class": "Telemetry_Consumer",
+    "type": "Generic_HTTP",
+    "host": "${logStashIP}",
+    "protocol": "http",
+    "port": ${logStashPort},
+    "path": "/",
+    "method": "POST",
+    "headers": [
+         {
+           "name": "content-type",
+           "value": "application/json"
+         }
+     ]
+ }
 }

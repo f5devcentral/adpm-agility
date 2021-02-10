@@ -58,7 +58,7 @@ cat << EOF > /etc/consul.d/server.hcl
 server = true
 bootstrap_expect = 1
 client_addr = "0.0.0.0"
-advertise_addr = "10.90.2.100"
+advertise_addr = "10.2.1.100"
 retry_join = ["provider=azure tag_name=Env tag_value=consul tenant_id=.. client_id=.. subscription_id=.. secret_access_key=.."]
 EOF
 

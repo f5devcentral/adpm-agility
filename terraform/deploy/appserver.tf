@@ -81,6 +81,7 @@ resource "azurerm_virtual_machine" "app" {
    computer_name  = "appserver"
    admin_username = "xuser"
    admin_password = "F5labnet!"
+   custom_data    = filebase64("backend.sh")
  }
 
  os_profile_linux_config {
@@ -88,36 +89,7 @@ resource "azurerm_virtual_machine" "app" {
  }
 
   tags = {
-    Name                = "${var.environment}-backendapp"
-    environment         = var.environment
-    owner               = var.owner
-    group               = var.group
-    costcenter          = var.costcenter
-    application         = var.application
-    tag_name            = "Env"
-    value               = "consul"
-    propagate_at_launch = true
-    key                 = "Env"
-    value               = "consul"
-  }
-}
-
-resource "azurerm_virtual_machine_extension" "appext" {
- count                 = var.app_count
- name                  = "app_ext_${count.index}"
-  virtual_machine_id   = azurerm_virtual_machine.app[count.index].id
-  publisher            = "Microsoft.Azure.Extensions"
-  type                 = "CustomScript"
-  type_handler_version = "2.0"
-
-  settings = <<SETTINGS
-    {
-        "commandToExecute":  "export PATH=$PATH:/usr/bin && sudo apt-get update && sudo apt-get -y install nginx"
-    }
-SETTINGS
-
-  tags = {
-    Name                = "${var.environment}-backendapp"
+    Name                = "${var.environment}-backendapp_${count.index}"
     environment         = var.environment
     owner               = var.owner
     group               = var.group

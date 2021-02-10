@@ -106,9 +106,7 @@ resource "azurerm_virtual_machine_extension" "splunkext" {
 
   settings = <<SETTINGS
     {
-        "commandToExecute":  "
-        
-        "
+        "commandToExecute":  "cd /tmp && wget https://download.splunk.com/products/splunk/releases/7.1.1/linux/splunk-7.1.1-8f0ead9ec3db-linux-2.6-amd64.deb && sudo dpkg -i splunk-7.1.1-8f0ead9ec3db-linux-2.6-amd64.deb"
     }
 SETTINGS
 
