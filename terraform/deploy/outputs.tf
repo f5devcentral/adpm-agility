@@ -26,3 +26,8 @@ output "alb_address" {
 output "consul_public_ip" {
    value = "http://${azurerm_public_ip.mgmt_public_ip.ip_address}:8500"
  }
+
+output "elk_public_ip" {
+   value = "http://${azurerm_public_ip.elk_public_ip.ip_address}"
+ }
+

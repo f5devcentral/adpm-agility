@@ -119,7 +119,7 @@ variable "cipherText" {default = ""}
 variable "protectedVal" {default = ""}
 
 variable "splunkIP" {default = "10.2.1.150"}
-variable "splunkPort" {default = "8088"}
+variable "splunkPort" {default = "8080"}
 
 ## Please check and update the latest DO URL from https://github.com/F5Networks/f5-declarative-onboarding/releases
 # always point to a specific version in order to avoid inadvertent configuration inconsistency

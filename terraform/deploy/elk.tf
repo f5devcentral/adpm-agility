@@ -1,50 +1,49 @@
- 
- resource "azurerm_public_ip" "mgmt_public_ip" {
-  name                = "pip-mgmt-consul"
+  resource "azurerm_public_ip" "elk_public_ip" {
+  name                = "pip-mgmt-elk"
   location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
   allocation_method   = "Static"   # Static is required due to the use of the Standard sku
   tags = {
-    Name   = "pip-mgmt-consul"
+    Name   = "pip-mgmt-elk"
     source = "terraform"
   }
 }
 
-resource "azurerm_network_interface" "consulvm-ext-nic" {
-  name               = "${local.student_id}-consulvm-ext-nic"
+resource "azurerm_network_interface" "elkvm-ext-nic" {
+  name               = "${local.student_id}-elkvm-ext-nic"
   location           = var.location
   resource_group_name = azurerm_resource_group.rg.name
   ip_configuration {
     name                          = "primary"
     subnet_id                     =  data.azurerm_subnet.mgmt.id
     private_ip_address_allocation = "Static"
-    private_ip_address            = "10.2.1.100"
+    private_ip_address            = "10.2.1.125"
     primary                       = true
-    public_ip_address_id          = azurerm_public_ip.mgmt_public_ip.id
+    public_ip_address_id          = azurerm_public_ip.elk_public_ip.id
   }
 
   tags = {
-    Name        = "${local.student_id}-consulvm-ext-int"
-    application = "consulserver"
+    Name        = "${local.student_id}-elkvm-ext-int"
+    application = "elkserver"
     tag_name    = "Env"
-    value       = "consul"
+    value       = "elk"
   }
 }
 
-resource "azurerm_virtual_machine" "consulvm" {
-  name                  = "consulvm"
+resource "azurerm_virtual_machine" "elkvm" {
+  name                  = "elkvm"
   location              = var.location
   resource_group_name   = azurerm_resource_group.rg.name
-  network_interface_ids = [azurerm_network_interface.consulvm-ext-nic.id]
-  vm_size               = "Standard_DS1_v2"
+  network_interface_ids = [azurerm_network_interface.elkvm-ext-nic.id]
+  vm_size               = "Standard_DS3_v2"
 
   storage_os_disk {
-    name              = "consulvmOsDisk"
+    name              = "elkvmOsDisk"
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Premium_LRS"
   }
-
+  
   storage_image_reference {
     publisher = "Canonical"
     offer     = "UbuntuServer"
@@ -53,10 +52,10 @@ resource "azurerm_virtual_machine" "consulvm" {
   }
 
   os_profile {
-    computer_name  = "consulvm"
-    admin_username = "azureuser"
+    computer_name  = "elkvm"
+    admin_username = "elkuser"
     admin_password = var.upassword
-    custom_data    = file("consul.sh")
+    custom_data    = file("./elk.sh")
 
   }
 
@@ -65,9 +64,10 @@ resource "azurerm_virtual_machine" "consulvm" {
   }
 
   tags = {
-    Name                = "${local.student_id}-consulvm"
+    Name                = "${local.student_id}-elkvm"
     tag_name            = "Env"
-    value               = "consul"
+    value               = "elk"
     propagate_at_launch = true
   }
 }
+

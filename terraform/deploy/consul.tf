@@ -11,7 +11,7 @@
 }
 
 resource "azurerm_network_interface" "consulvm-ext-nic" {
-  name               = "${var.prefix}-consulvm-ext-nic"
+  name               = "${local.student_id}-consulvm-ext-nic"
   location           = var.location
   resource_group_name = azurerm_resource_group.rg.name
   ip_configuration {
@@ -24,7 +24,7 @@ resource "azurerm_network_interface" "consulvm-ext-nic" {
   }
 
   tags = {
-    Name        = "${var.prefix}-consulvm-ext-int"
+    Name        = "${local.student_id}-consulvm-ext-int"
     application = "consulserver"
     tag_name    = "Env"
     value       = "consul"
@@ -56,7 +56,7 @@ resource "azurerm_virtual_machine" "consulvm" {
     computer_name  = "consulvm"
     admin_username = "azureuser"
     admin_password = var.upassword
-    custom_data    = file("consul.sh")
+    custom_data    = file("./consul.sh")
 
   }
 
@@ -65,7 +65,7 @@ resource "azurerm_virtual_machine" "consulvm" {
   }
 
   tags = {
-    Name                = "${var.prefix}-consulvm"
+    Name                = "${local.student_id}-consulvm"
     tag_name            = "Env"
     value               = "consul"
     propagate_at_launch = true

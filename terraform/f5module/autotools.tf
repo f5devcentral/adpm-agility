@@ -34,6 +34,7 @@ data "template_file" "as3_json" {
   vars = {
     backendvm_ip    = var.backend01ext
     web_pool        = "myapp-${var.app}"
+    app_name        = var.app_name
   }
 }
 
@@ -42,7 +43,7 @@ data "template_file" "as3_json" {
 
   vars = {
     region      = data.azurerm_resource_group.bigiprg.location
-    splunkIP  = var.splunkIP
-    splunkPort = var.splunkPort
+    logStashIP  = var.logStashIP
+    logStashPort = var.logStashPort
   }
 }

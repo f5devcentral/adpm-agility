@@ -56,7 +56,7 @@ resource "azurerm_lb_backend_address_pool" "alb-backend" {
 #Create N-nic bigip
 #
 module bigip {
-  count 		     = var.instance_count
+  count 		     = var.bigip_count
   source                     = "../f5module/"
   prefix                     = format("%s-2nic", var.prefix)
   resource_group_name        = azurerm_resource_group.rg.name
@@ -65,13 +65,14 @@ module bigip {
   external_subnet_ids        = [{ "subnet_id" = data.azurerm_subnet.external-public.id, "public_ip" = true,"private_ip_primary" = "", "private_ip_secondary" = ""}]
   external_securitygroup_ids = [module.external-network-security-group-public.network_security_group_id]
   availabilityZones          = var.availabilityZones
-  backendpool_id              = azurerm_lb_backend_address_pool.alb-backend.id
+  backendpool_id             = azurerm_lb_backend_address_pool.alb-backend.id
+  app_name                   = var.app_name 
 }
 
 
 resource "null_resource" "clusterDO" {
 
-  count = var.instance_count
+  count = var.bigip_count
 
   provisioner "local-exec" {
     command = "cat > DO_2nic-instance${count.index}.json <<EOL\n ${module.bigip[count.index].onboard_do}\nEOL"
