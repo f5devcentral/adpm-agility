@@ -38,11 +38,6 @@ variable app_name {
   default = "app1"
 }
 
-variable elk_file {
-  type    = string
-  default = "elk.sh"
-}
-
 # TAGS
 variable "purpose" { default = "public" }
 variable "environment" { default = "f5env" } #ex. dev/staging/prod

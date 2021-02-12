@@ -1,5 +1,4 @@
- 
- resource "azurerm_public_ip" "elk_public_ip" {
+  resource "azurerm_public_ip" "elk_public_ip" {
   name                = "pip-mgmt-elk"
   location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
@@ -36,7 +35,7 @@ resource "azurerm_virtual_machine" "elkvm" {
   location              = var.location
   resource_group_name   = azurerm_resource_group.rg.name
   network_interface_ids = [azurerm_network_interface.elkvm-ext-nic.id]
-  vm_size               = "Standard_DS1_v2"
+  vm_size               = "Standard_DS3_v2"
 
   storage_os_disk {
     name              = "elkvmOsDisk"
@@ -44,25 +43,19 @@ resource "azurerm_virtual_machine" "elkvm" {
     create_option     = "FromImage"
     managed_disk_type = "Premium_LRS"
   }
-
-  storage_image_reference {
-    publisher = "bitnami"
-    offer     = "elk"
-    sku       = "4-6"
-    version   = "latest"
-  }
   
-  plan {
-    name = "4-6"
-    publisher = "bitnami"
-    product = "elk"
+  storage_image_reference {
+    publisher = "Canonical"
+    offer     = "UbuntuServer"
+    sku       = "16.04.0-LTS"
+    version   = "latest"
   }
 
   os_profile {
     computer_name  = "elkvm"
     admin_username = "elkuser"
     admin_password = var.upassword
-    #custom_data    = file("elk.sh")
+    custom_data    = file("./elk.sh")
 
   }
 
@@ -78,20 +71,3 @@ resource "azurerm_virtual_machine" "elkvm" {
   }
 }
 
-resource "azurerm_virtual_machine_extension" "elkvm" {
-  name                 = "hostname"
-  virtual_machine_id   = azurerm_virtual_machine.elkvm.id
-  publisher            = "Microsoft.Azure.Extensions"
-  type                 = "CustomScript"
-  type_handler_version = "2.0"
-
-  settings = <<SETTINGS
-    {
-        "commandToExecute": ""
-    }
-SETTINGS
-
-  tags = {
-    environment = "Production"
-  }
-}

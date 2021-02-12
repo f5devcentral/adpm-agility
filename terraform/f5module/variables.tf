@@ -123,9 +123,6 @@ variable "tls_key" {default = ""}
 variable "cipherText" {default = ""}
 variable "protectedVal" {default = ""}
 
-variable "splunkIP" {default = "10.2.1.150"}
-variable "splunkPort" {default = "8088"}
-
 variable "logStashIP" {default = "10.2.1.125"}
 variable "logStashPort" {default = "8080"}
 
