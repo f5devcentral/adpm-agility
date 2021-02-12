@@ -148,7 +148,7 @@ jobs:
         run: echo "CANNOT scale to the desired capacity" 
 
   scale:
-    if: needs.build.outputs.can_scale == 'true'
+    if: needs.build.outputs.can_scale == 'true' && 0==1
     runs-on: ubuntu-latest
     env:
       ACTIONS_ALLOW_UNSECURE_COMMANDS: true
@@ -262,4 +262,3 @@ jobs:
       - name: update time on k/v store
         run: echo `date +"%Y%m%d.%H%M%S%2N"` | consul kv put -http-addr=${{ needs.build.outputs.consul_server }} adpm/labs/agility/students/${{ needs.build.outputs.student_id }}/scaling/bigip/last_modified_time -
 
-n
