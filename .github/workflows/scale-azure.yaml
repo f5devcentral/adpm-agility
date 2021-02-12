@@ -107,7 +107,7 @@ jobs:
           echo ::set-output name=bigip_count::${{ steps.student_data.outputs.bigip_instance_count }}
           echo ::set-output name=app_count::${{ steps.student_data.outputs.app_instance_count }}
 
-          if ${{ github.event.client_payload.scaling_type }} == "bigip"; then
+          if "${{ github.event.client_payload.scaling_type }}" == "bigip"; then
             if [[ $DIRECTION == 'in' ]]  && [[ ${{ steps.delta.outputs.bigip-scale-in }} > 0 ]]; then
               echo "::set-env name=direction::in"
               echo "DIRECTION IS IN"
@@ -120,7 +120,7 @@ jobs:
               echo "::set-output name=new_count::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} + 1)"
               echo ::set-output name=can_scale::'true'
             fi
-          elif ${{ github.event.client_payload.scaling_type }} == "app"; then
+          elif "${{ github.event.client_payload.scaling_type }}" == "app"; then
             if [[ $DIRECTION == 'in' ]]  && [[ ${{ steps.delta.outputs.app-scale-in }} > 0 ]]; then
               echo "::set-env name=direction::in"
               echo "DIRECTION IS IN"
