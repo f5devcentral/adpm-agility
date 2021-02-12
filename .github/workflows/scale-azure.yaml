@@ -113,7 +113,7 @@ jobs:
               echo "DIRECTION IS IN"
               echo "::set-output name=bigip_count::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1)"
               echo ::set-output name=can_scale::'true'
-            elif [[ $DIRECTION == 'out' ]]  && [[ ${{ steps.delta.outputs.scale-out }} > 0 ]]; then
+            elif [[ $DIRECTION == 'out' ]]  && [[ ${{ steps.delta.outputs.bigip-scale-out }} > 0 ]]; then
               echo "::set-env name=direction::out"
               echo "::set-output name=direction::out"
               echo "DIRECTION IS OUT"
