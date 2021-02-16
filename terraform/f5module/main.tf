@@ -3,7 +3,7 @@ terraform {
   required_providers {
       azurerm = {
          source = "hashicorp/azurerm"
-	 version = "~>2.28.0"
+	       version = "~>2.28.0"
        }
        random = {
          source = "hashicorp/random"
@@ -36,7 +36,7 @@ locals {
     "internal_subnet_ids"        = var.internal_subnet_ids
     "internal_securitygroup_ids" = var.internal_securitygroup_ids
   }
-  
+
   upass = random_string.password.result
 
   mgmt_public_subnet_id = [
@@ -223,6 +223,23 @@ resource "azurerm_public_ip" "mgmt_public_ip" {
   }
 }
 
+resource "azurerm_public_ip" "external_public_ip" {
+  count               = length(local.external_public_subnet_id)
+  name                = "${local.instance_prefix}-pip-ext-${count.index}"
+  location            = data.azurerm_resource_group.bigiprg.location
+  resource_group_name = data.azurerm_resource_group.bigiprg.name
+  //allocation_method   = var.allocation_method
+  //domain_name_label   = element(var.public_ip_dns, count.index)
+  domain_name_label   = format("ext-%s-%s", local.instance_prefix, count.index)
+  allocation_method = "Static"   # Static is required due to the use of the Standard sku
+  sku               = "Standard" # the Standard sku is required due to the use of availability zones
+  zones             = var.availabilityZones
+  tags = {
+    Name   = "${local.instance_prefix}-pip-ext-${count.index}"
+    source = "terraform"
+  }
+}
+
 resource "azurerm_public_ip" "secondary_external_public_ip" {
   count               = length(local.external_public_subnet_id)
   name                = "${local.instance_prefix}-secondary-pip-ext-${count.index}"
@@ -292,10 +309,55 @@ resource "azurerm_network_interface" "external_public_nic" {
     primary                       = "true"
     private_ip_address_allocation = ( length(local.external_public_private_ip_primary[count.index]) > 0 ? "Static" : "Dynamic" )
     private_ip_address            = ( length(local.external_public_private_ip_primary[count.index]) > 0 ? local.external_public_private_ip_primary[count.index] : null )
+    public_ip_address_id          = azurerm_public_ip.external_public_ip[count.index].id
+  }
+  ip_configuration {
+      name                          = "${local.instance_prefix}-ext-public-secondary-ip-${count.index}"
+      subnet_id                     = local.external_public_subnet_id[count.index]
+      private_ip_address_allocation = ( length(local.external_public_private_ip_secondary[count.index]) > 0 ? "Static" : "Dynamic" )
+      private_ip_address            = ( length(local.external_public_private_ip_secondary[count.index]) > 0 ? local.external_public_private_ip_secondary[count.index] : null )
+      public_ip_address_id          = azurerm_public_ip.secondary_external_public_ip[count.index].id
   }
   tags = {
     Name   = "${local.instance_prefix}-ext-public-nic-${count.index}"
     source = "terraform"
+  }
+}
+
+#
+# Associate interface with load balancer
+#
+
+data "template_file" "azure_cli_add_sh" {
+  count               = length(local.external_public_subnet_id)
+  template            = file("${path.module}/lb_associate.sh")
+  depends_on          = [azurerm_network_interface.external_public_nic]
+  vars = {
+    rg_name         = data.azurerm_resource_group.bigiprg.name
+    nic_name        = azurerm_network_interface.external_public_nic[count.index].name
+    ip_config       = "${local.instance_prefix}-ext-public-secondary-ip-${count.index}"
+    lb_name         = format("%s-loadbalancer", local.student_id)   
+    student_id      = local.student_id
+    instance_id     = local.instance_prefix
+  }
+}
+
+resource "null_resource" "azure_cli_add" {
+  count               = length(local.external_public_subnet_id)
+  depends_on          = [data.template_file.azure_cli_add_sh]  
+  
+  provisioner "local-exec" {
+    # Call Azure CLI Script here
+    command = element(data.template_file.azure_cli_add_sh.*.rendered,0)
+  }
+}
+
+data "consul_keys" "vip" {
+  depends_on = [null_resource.azure_cli_add]
+  # Read the vip address from Consul
+  key {
+    name    = "vip_address"
+    path    = format("adpm/labs/agility/students/%s/%s/vip", local.student_id, local.instance_prefix)
   }
 }
 
@@ -444,11 +506,4 @@ data "template_file" "clustermemberDO2" {
     gateway       = join(".", concat(slice(split(".",local.gw_bytes_nic),0,3),[1]) )
   }
   depends_on = [azurerm_network_interface.external_nic, azurerm_network_interface.external_public_nic, azurerm_network_interface.internal_nic]
-}
-
-resource "azurerm_network_interface_backend_address_pool_association" "example" {
-  count                   = length(local.external_private_security_id)
-  network_interface_id    = azurerm_network_interface.external_nic[count.index].id
-  ip_configuration_name   = "testconfiguration1"
-  backend_address_pool_id = var.backendpool_id
 }

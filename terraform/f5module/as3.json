@@ -23,9 +23,9 @@
 				"template": "https",
 				"serviceMain": {
 					"class": "Service_HTTPS",
-					"virtualPort": 8080,
+					"virtualPort": 443,
 					"virtualAddresses": [
-						"0.0.0.0"
+						${local_selfip}
 					],
 					"pool": "${web_pool}",
 					"serverTLS": "webtls"

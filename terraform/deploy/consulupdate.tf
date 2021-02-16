@@ -1,6 +1,3 @@
-provider "consul" {
-  address = "54.162.126.20:8500"
-}
 resource "consul_keys" "app" {
   datacenter = "dc1"
   # Set the CNAME of our load balancer as a key

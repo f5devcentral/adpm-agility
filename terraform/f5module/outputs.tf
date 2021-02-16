@@ -46,3 +46,8 @@ output "private_addresses" {
 output mgmt_nic {
   value = azurerm_network_interface.mgmt_nic.*.id
 }
+
+output vips {
+  value = element(azurerm_network_interface.external_public_nic.*.private_ip_addresses,1)
+}
+
