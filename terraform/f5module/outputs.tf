@@ -28,11 +28,6 @@ output onboard_do {
 
 }
 
-output "public_addresses" {
-  description = "List of BIG-IP public addresses"
-  value   = concat(azurerm_public_ip.secondary_external_public_ip.*.ip_address)
-}
-
 output "external_nics" {
   description = "List of BIG-IP external nics"
   value   = concat(azurerm_network_interface.external_nic.*.id)

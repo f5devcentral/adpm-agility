@@ -223,38 +223,6 @@ resource "azurerm_public_ip" "mgmt_public_ip" {
   }
 }
 
-resource "azurerm_public_ip" "external_public_ip" {
-  count               = length(local.external_public_subnet_id)
-  name                = "${local.instance_prefix}-pip-ext-${count.index}"
-  location            = data.azurerm_resource_group.bigiprg.location
-  resource_group_name = data.azurerm_resource_group.bigiprg.name
-  //allocation_method   = var.allocation_method
-  //domain_name_label   = element(var.public_ip_dns, count.index)
-  domain_name_label   = format("ext-%s-%s", local.instance_prefix, count.index)
-  allocation_method = "Static"   # Static is required due to the use of the Standard sku
-  sku               = "Standard" # the Standard sku is required due to the use of availability zones
-  zones             = var.availabilityZones
-  tags = {
-    Name   = "${local.instance_prefix}-pip-ext-${count.index}"
-    source = "terraform"
-  }
-}
-
-resource "azurerm_public_ip" "secondary_external_public_ip" {
-  count               = length(local.external_public_subnet_id)
-  name                = "${local.instance_prefix}-secondary-pip-ext-${count.index}"
-  location            = data.azurerm_resource_group.bigiprg.location
-  resource_group_name = data.azurerm_resource_group.bigiprg.name
-  domain_name_label   = format("sec-ext-%s-%s", local.instance_prefix, count.index)
-  allocation_method = "Static"   # Static is required due to the use of the Standard sku
-  sku               = "Standard" # the Standard sku is required due to the use of availability zones
-  zones             = var.availabilityZones
-  tags = {
-    Name   = "${local.instance_prefix}-secondary-pip-ext-${count.index}"
-    source = "terraform"
-  }
-}
-
 # Deploy BIG-IP with N-Nic interface 
 resource "azurerm_network_interface" "mgmt_nic" {
   count               = length(local.bigip_map["mgmt_subnet_ids"])
@@ -309,14 +277,12 @@ resource "azurerm_network_interface" "external_public_nic" {
     primary                       = "true"
     private_ip_address_allocation = ( length(local.external_public_private_ip_primary[count.index]) > 0 ? "Static" : "Dynamic" )
     private_ip_address            = ( length(local.external_public_private_ip_primary[count.index]) > 0 ? local.external_public_private_ip_primary[count.index] : null )
-    public_ip_address_id          = azurerm_public_ip.external_public_ip[count.index].id
   }
   ip_configuration {
       name                          = "${local.instance_prefix}-ext-public-secondary-ip-${count.index}"
       subnet_id                     = local.external_public_subnet_id[count.index]
       private_ip_address_allocation = ( length(local.external_public_private_ip_secondary[count.index]) > 0 ? "Static" : "Dynamic" )
       private_ip_address            = ( length(local.external_public_private_ip_secondary[count.index]) > 0 ? local.external_public_private_ip_secondary[count.index] : null )
-      public_ip_address_id          = azurerm_public_ip.secondary_external_public_ip[count.index].id
   }
   tags = {
     Name   = "${local.instance_prefix}-ext-public-nic-${count.index}"
@@ -464,7 +430,7 @@ resource "azurerm_virtual_machine" "f5vm" {
     Name   = "${local.instance_prefix}-f5vm01"
     source = "terraform"
   }
-  depends_on = [azurerm_network_interface_security_group_association.mgmt_security, azurerm_network_interface_security_group_association.internal_security, azurerm_network_interface_security_group_association.external_security, azurerm_network_interface_security_group_association.external_public_security, azurerm_public_ip.secondary_external_public_ip, azurerm_public_ip.mgmt_public_ip]
+  depends_on = [azurerm_network_interface_security_group_association.mgmt_security, azurerm_network_interface_security_group_association.internal_security, azurerm_network_interface_security_group_association.external_security, azurerm_network_interface_security_group_association.external_public_security, azurerm_public_ip.mgmt_public_ip]
 }
 
 ## ..:: Run Startup Script ::..
