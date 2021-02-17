@@ -57,7 +57,7 @@ jobs:
       - name: do we run?
         if: steps.check_running.outputs.is_running == 'true'
         run: |
-          if [[ steps.check_running.outputs.is_running == 'true' ]]; then
+          if ${{ steps.check_running.outputs.is_running }}; then
             exit 1
           else
           echo "Good to go!"
