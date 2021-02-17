@@ -24,6 +24,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+    
+
       - name: output webhook payload
         run: echo "The source of the webhook is = ${{ github.event.client_payload }}"
 
@@ -47,6 +49,20 @@ jobs:
       - name: get consul server parameters
         id: consul_params
         run: echo ::set-output name=consul_server::$(cat configs/consul_server.cfg)
+
+      - name: check if another running already
+        id: check_running
+        run: echo ::set-output name=is_running::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.outputs.student_id }}/scaling/bigip/is_running)
+
+      - name: do we run?
+        if: steps.check_running.outputs.is_running == 'true'
+        run: |
+          if ${{ steps.check_running.outputs.is_running }}; then
+            exit 1
+          else
+            echo "Good to go!"
+          fi
+
 
       - name: query bigip scaling min/max values
         id: query_scaling
