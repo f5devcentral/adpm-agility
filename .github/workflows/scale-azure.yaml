@@ -60,7 +60,7 @@ jobs:
           if ${{ steps.check_running.outputs.is_running }}; then
             exit 1
           else
-          echo "Good to go!"
+            echo "Good to go!"
           fi
 
 
