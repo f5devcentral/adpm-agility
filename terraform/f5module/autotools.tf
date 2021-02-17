@@ -30,11 +30,13 @@ data "template_file" "vm01_do_json" {
 }
 
 data "template_file" "as3_json" {
+  depends_on = [null_resource.azure_cli_add]
   template = file("${path.module}/as3.json")
   vars = {
     backendvm_ip    = var.backend01ext
     web_pool        = "myapp-${var.app}"
     app_name        = var.app_name
+    local_selfip    = data.consul_keys.vip.var.vip_address
   }
 }
 

@@ -34,7 +34,7 @@ EOF
   sudo ln -s /etc/nginx/sites-available/example.com /etc/nginx/sites-enabled/example.com && sudo systemctl restart nginx 
 }
 
-install_lostash() {
+install_logstash() {
   # Install and Start Logstash
   sudo apt install -y logstash 
   sudo cat << EOF > /etc/logstash/conf.d/f5logstash.conf
@@ -79,6 +79,6 @@ EOF
 install_nginx
 install_elastic
 install_kibana
-install_lostash
+install_logstash
 
 

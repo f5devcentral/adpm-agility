@@ -2,6 +2,10 @@ provider azurerm {
     features {}
 }
 
+provider "consul" {
+  address = "54.162.126.20:8500"
+}
+
 #
 # Create a random id
 #
@@ -32,25 +36,27 @@ resource "azurerm_public_ip" "alb_public_ip" {
 }
 
 #
-# Create a load balancer for bigip(s)
+# Create a load balancer for bigip(s) via azurecli
 #
-resource "azurerm_lb" "alb" {
-  name                = format("%s-alb-bigip", local.student_id)
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-  sku                 = "Standard"
-
-  frontend_ip_configuration {
-    name                 = "PublicIPAddress"
-    public_ip_address_id = azurerm_public_ip.alb_public_ip.id
+data "template_file" "azure_cli_sh" {
+  template = file("./azure_lb.sh")
+  depends_on = [azurerm_resource_group.rg, azurerm_public_ip.alb_public_ip]
+  vars = {
+    rg_name         = azurerm_resource_group.rg.name
+    public_ip       = azurerm_public_ip.alb_public_ip.name
+    lb_name         = format("%s-loadbalancer", local.student_id)         
   }
 }
 
-resource "azurerm_lb_backend_address_pool" "alb-backend" {
-  resource_group_name = azurerm_resource_group.rg.name
-  loadbalancer_id     = azurerm_lb.alb.id
-  name                = format("f5pool-%s", local.student_id)
+resource "null_resource" "azure-cli" {
+  
+  provisioner "local-exec" {
+    # Call Azure CLI Script here
+    command = data.template_file.azure_cli_sh.rendered
+  }
 }
+
+
 
 #
 #Create N-nic bigip
@@ -65,8 +71,12 @@ module bigip {
   external_subnet_ids        = [{ "subnet_id" = data.azurerm_subnet.external-public.id, "public_ip" = true,"private_ip_primary" = "", "private_ip_secondary" = ""}]
   external_securitygroup_ids = [module.external-network-security-group-public.network_security_group_id]
   availabilityZones          = var.availabilityZones
-  backendpool_id             = azurerm_lb_backend_address_pool.alb-backend.id
   app_name                   = var.app_name 
+  providers = {
+    consul = consul
+  }
+
+  depends_on                 = [null_resource.azure-cli]
 }
 
 
@@ -186,6 +196,7 @@ resource "azurerm_network_security_rule" "external_allow_https" {
   network_security_group_name = format("%s-external-public-nsg-%s", local.student_id, random_id.id.hex)
   depends_on                  = [module.external-network-security-group-public]
 }
+
 resource "azurerm_network_security_rule" "external_allow_ssh" {
   name                        = "Allow_ssh"
   priority                    = 202
