@@ -3,7 +3,7 @@ terraform {
   required_providers {
       azurerm = {
          source = "hashicorp/azurerm"
-	 version = "~>2.28.0"
+	       version = "~>2.28.0"
        }
        random = {
          source = "hashicorp/random"
@@ -36,7 +36,7 @@ locals {
     "internal_subnet_ids"        = var.internal_subnet_ids
     "internal_securitygroup_ids" = var.internal_securitygroup_ids
   }
-  
+
   upass = random_string.password.result
 
   mgmt_public_subnet_id = [
@@ -164,7 +164,6 @@ locals {
     if private["public_ip"] == false
   ]
 
-
   internal_private_security_id = [
     for i in local.internal_private_index : local.bigip_map["internal_securitygroup_ids"][i]
   ]
@@ -224,21 +223,6 @@ resource "azurerm_public_ip" "mgmt_public_ip" {
   }
 }
 
-resource "azurerm_public_ip" "secondary_external_public_ip" {
-  count               = length(local.external_public_subnet_id)
-  name                = "${local.instance_prefix}-secondary-pip-ext-${count.index}"
-  location            = data.azurerm_resource_group.bigiprg.location
-  resource_group_name = data.azurerm_resource_group.bigiprg.name
-  domain_name_label   = format("sec-ext-%s-%s", local.instance_prefix, count.index)
-  allocation_method = "Static"   # Static is required due to the use of the Standard sku
-  sku               = "Standard" # the Standard sku is required due to the use of availability zones
-  zones             = var.availabilityZones
-  tags = {
-    Name   = "${local.instance_prefix}-secondary-pip-ext-${count.index}"
-    source = "terraform"
-  }
-}
-
 # Deploy BIG-IP with N-Nic interface 
 resource "azurerm_network_interface" "mgmt_nic" {
   count               = length(local.bigip_map["mgmt_subnet_ids"])
@@ -294,9 +278,52 @@ resource "azurerm_network_interface" "external_public_nic" {
     private_ip_address_allocation = ( length(local.external_public_private_ip_primary[count.index]) > 0 ? "Static" : "Dynamic" )
     private_ip_address            = ( length(local.external_public_private_ip_primary[count.index]) > 0 ? local.external_public_private_ip_primary[count.index] : null )
   }
+  ip_configuration {
+      name                          = "${local.instance_prefix}-ext-public-secondary-ip-${count.index}"
+      subnet_id                     = local.external_public_subnet_id[count.index]
+      private_ip_address_allocation = ( length(local.external_public_private_ip_secondary[count.index]) > 0 ? "Static" : "Dynamic" )
+      private_ip_address            = ( length(local.external_public_private_ip_secondary[count.index]) > 0 ? local.external_public_private_ip_secondary[count.index] : null )
+  }
   tags = {
     Name   = "${local.instance_prefix}-ext-public-nic-${count.index}"
     source = "terraform"
+  }
+}
+
+#
+# Associate interface with load balancer
+#
+
+data "template_file" "azure_cli_add_sh" {
+  count               = length(local.external_public_subnet_id)
+  template            = file("${path.module}/lb_associate.sh")
+  depends_on          = [azurerm_network_interface.external_public_nic]
+  vars = {
+    rg_name         = data.azurerm_resource_group.bigiprg.name
+    nic_name        = azurerm_network_interface.external_public_nic[count.index].name
+    ip_config       = "${local.instance_prefix}-ext-public-secondary-ip-${count.index}"
+    lb_name         = format("%s-loadbalancer", local.student_id)   
+    student_id      = local.student_id
+    instance_id     = local.instance_prefix
+  }
+}
+
+resource "null_resource" "azure_cli_add" {
+  count               = length(local.external_public_subnet_id)
+  depends_on          = [data.template_file.azure_cli_add_sh]  
+  
+  provisioner "local-exec" {
+    # Call Azure CLI Script here
+    command = element(data.template_file.azure_cli_add_sh.*.rendered,0)
+  }
+}
+
+data "consul_keys" "vip" {
+  depends_on = [null_resource.azure_cli_add]
+  # Read the vip address from Consul
+  key {
+    name    = "vip_address"
+    path    = format("adpm/labs/agility/students/%s/%s/vip", local.student_id, local.instance_prefix)
   }
 }
 
@@ -403,7 +430,7 @@ resource "azurerm_virtual_machine" "f5vm" {
     Name   = "${local.instance_prefix}-f5vm01"
     source = "terraform"
   }
-  depends_on = [azurerm_network_interface_security_group_association.mgmt_security, azurerm_network_interface_security_group_association.internal_security, azurerm_network_interface_security_group_association.external_security, azurerm_network_interface_security_group_association.external_public_security, azurerm_public_ip.secondary_external_public_ip, azurerm_public_ip.mgmt_public_ip]
+  depends_on = [azurerm_network_interface_security_group_association.mgmt_security, azurerm_network_interface_security_group_association.internal_security, azurerm_network_interface_security_group_association.external_security, azurerm_network_interface_security_group_association.external_public_security, azurerm_public_ip.mgmt_public_ip]
 }
 
 ## ..:: Run Startup Script ::..
@@ -446,4 +473,3 @@ data "template_file" "clustermemberDO2" {
   }
   depends_on = [azurerm_network_interface.external_nic, azurerm_network_interface.external_public_nic, azurerm_network_interface.internal_nic]
 }
-

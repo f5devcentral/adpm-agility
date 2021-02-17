@@ -6,7 +6,20 @@
   },
   "My_Poller": {
     "class": "Telemetry_System_Poller",
-    "interval": 60
+    "interval": 60,
+    "actions": [
+      {
+        "excludeData": {},
+        "locations": {
+            "system": true
+        }
+      },
+      {         
+      "includeData": {},
+        "locations": {
+            "avr": true  
+        }    
+     }]
   },
   "My_Listener": {
     "class": "Telemetry_Listener",

@@ -118,8 +118,8 @@ variable "tls_key" {default = ""}
 variable "cipherText" {default = ""}
 variable "protectedVal" {default = ""}
 
-variable "splunkIP" {default = "10.2.1.150"}
-variable "splunkPort" {default = "8080"}
+variable "logStashIP" {default = "10.2.1.125"}
+variable "logStashPort" {default = "8080"}
 
 ## Please check and update the latest DO URL from https://github.com/F5Networks/f5-declarative-onboarding/releases
 # always point to a specific version in order to avoid inadvertent configuration inconsistency
@@ -198,6 +198,16 @@ variable azure_keyvault_name {
   description = "The name of the Azure Key Vault to use"
   type        = string
   default     = ""
+}
+
+variable app_name {
+  type    = string
+  default = ""
+}
+
+variable central_consul {
+  type    = string
+  default = ""
 }
 
 variable azure_keyvault_secret_name {
