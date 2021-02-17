@@ -52,7 +52,15 @@ jobs:
 
       - name: check if another running already
         id: check_running
-        run: echo ::set-output name=is_running::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.outputs.student_id }}/scaling/bigip/is_running)
+        run: |
+          if ${{ github.event.client_payload.scaling_type }} == "bigip"; then
+            echo ::set-output name=is_running::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.outputs.student_id }}/scaling/bigip/is_running)
+          elif ${{ github.event.client_payload.scaling_type }} == "app"; then
+            echo ::set-output name=is_running::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.outputs.student_id }}/scaling/apps/${{ github.event.client_payload.app_name }}/is_running)
+          else
+            echo "SCALING TYPE NOT SET!!!"
+          fi
+
 
       - name: do we run?
         if: steps.check_running.outputs.is_running == 'true'
