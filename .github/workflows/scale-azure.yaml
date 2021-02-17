@@ -58,7 +58,7 @@ jobs:
         if: steps.check_running.outputs.is_running == 'true'
         run: |
           echo "Another instance of this workflow is running and will abort this run"
-          exit (1)
+          exit
 
 
       - name: query bigip scaling min/max values
