@@ -1,8 +1,9 @@
 data "template_file" "backend_file" {
   template = file("../deploy/backend.tpl")
   vars = {
-    student_id = var.student_id
-    instance_count = var.instance_count
+    student_id  = var.student_id
+    bigip_count = var.bigip_count
+    app_count   = var.app_count
   }
 }
 

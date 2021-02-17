@@ -2,6 +2,11 @@ provider azurerm {
     features {}
 }
 
+provider "consul" {
+  address = "3.95.15.85:8500"
+}
+
+
 #
 # Create a random id
 #
@@ -22,12 +27,44 @@ resource azurerm_resource_group rg {
   location = var.location
 }
 
+resource "azurerm_public_ip" "alb_public_ip" {
+  name                = format("%s-alb-pip", local.student_id)
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+  zones             = var.availabilityZones
+}
+
+#
+# Create a load balancer for bigip(s) via azurecli
+#
+data "template_file" "azure_cli_sh" {
+  template = file("./azure_lb.sh")
+  depends_on = [azurerm_resource_group.rg, azurerm_public_ip.alb_public_ip]
+  vars = {
+    rg_name         = azurerm_resource_group.rg.name
+    public_ip       = azurerm_public_ip.alb_public_ip.name
+    lb_name         = format("%s-loadbalancer", local.student_id)         
+  }
+}
+
+resource "null_resource" "azure-cli" {
+  
+  provisioner "local-exec" {
+    # Call Azure CLI Script here
+    command = data.template_file.azure_cli_sh.rendered
+  }
+}
+
+
+
 #
 #Create N-nic bigip
 #
 module bigip {
-  count 		     = local.instance_count
-  source                     = "../"
+  count 		     = local.bigip_count
+  source                     = "../f5module/"
   prefix                     = format("%s-2nic", var.prefix)
   resource_group_name        = azurerm_resource_group.rg.name
   mgmt_subnet_ids            = [{ "subnet_id" = data.azurerm_subnet.mgmt.id, "public_ip" = true, "private_ip_primary" =  ""}]
@@ -35,12 +72,18 @@ module bigip {
   external_subnet_ids        = [{ "subnet_id" = data.azurerm_subnet.external-public.id, "public_ip" = true,"private_ip_primary" = "", "private_ip_secondary" = ""}]
   external_securitygroup_ids = [module.external-network-security-group-public.network_security_group_id]
   availabilityZones          = var.availabilityZones
+  app_name                   = var.app_name 
+  providers = {
+    consul = consul
+  }
+
+  depends_on                 = [null_resource.azure-cli]
 }
 
 
 resource "null_resource" "clusterDO" {
 
-  count = local.instance_count
+  count = local.bigip_count
 
   provisioner "local-exec" {
     command = "cat > DO_2nic-instance${count.index}.json <<EOL\n ${module.bigip[count.index].onboard_do}\nEOL"
@@ -154,6 +197,7 @@ resource "azurerm_network_security_rule" "external_allow_https" {
   network_security_group_name = format("%s-external-public-nsg-%s", local.student_id, random_id.id.hex)
   depends_on                  = [module.external-network-security-group-public]
 }
+
 resource "azurerm_network_security_rule" "external_allow_ssh" {
   name                        = "Allow_ssh"
   priority                    = 202

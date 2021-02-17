@@ -1,26 +1,3 @@
-variable prefix {
-  description = "Prefix for resources created by this module"
-  type        = string
-  default     = "student"
-}
-
-variable location {default = "East US"}
-
-variable cidr {
-  description = "Azure VPC CIDR"
-  type        = string
-  default     = "10.2.0.0/16"
-}
-
-variable upassword {default = "F5consul"}
-
-variable availabilityZones {
-  description = "If you want the VM placed in an Azure Availability Zone, and the Azure region you are deploying to supports it, specify the numbers of the existing Availability Zone you want to use."
-  type        = list
-  default     = [2]
-}
-variable AllowedIPs {}
-
 variable bigip_count {
   description = "Number of Bigip instances to create( From terraform 0.13, module supports count feature to spin mutliple instances )"
   type        = number
@@ -37,6 +14,29 @@ variable app_name {
   type    = string
   default = "app1"
 }
+
+variable prefix {
+  description = "Prefix for resources created by this module"
+  type        = string
+  default     = "student"
+}
+
+variable location {default = "East US"}
+
+variable cidr {
+  description = "Azure VPC CIDR"
+  type        = string
+  default     = "10.2.0.0/16"
+}
+
+variable upassword {default = "F5student!"}
+
+variable availabilityZones {
+  description = "If you want the VM placed in an Azure Availability Zone, and the Azure region you are deploying to supports it, specify the numbers of the existing Availability Zone you want to use."
+  type        = list
+  default     = [2]
+}
+variable AllowedIPs {}
 
 # TAGS
 variable "purpose" { default = "public" }

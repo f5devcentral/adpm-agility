@@ -3,8 +3,9 @@ provider azurerm {
 }
 
 provider "consul" {
-  address = "54.162.126.20:8500"
+  address = "3.95.15.85:8500"
 }
+
 
 #
 # Create a random id
