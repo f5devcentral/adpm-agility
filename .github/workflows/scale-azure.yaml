@@ -65,7 +65,7 @@ jobs:
 
       - name: do we run?
         run: |
-          if ${{ steps.check_running.outputs.is_running }}; then
+          if [[ ${{ steps.check_running.outputs.is_running }} ]]; then
             echo "WE ARE ABORTING BECAUSE ANOTHER RUNNING"
             exit 1
           else
