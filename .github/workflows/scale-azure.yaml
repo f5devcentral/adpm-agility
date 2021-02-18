@@ -46,7 +46,9 @@ jobs:
 
       - name: get consul server parameters
         id: consul_params
-        run: echo ::set-output name=consul_server::$(cat configs/consul_server.cfg)
+        run: |
+          echo ::set-output name=consul_server::$(cat configs/consul_server.cfg)
+          echo ::set-env name=CONSUL_HTTP_TOKEN::${{ secrets.CONSUL_HTTP_TOKEN }}
 
       - name: check if another running already
         id: check_running
@@ -296,7 +298,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-        
+
       - name: install consul client
         run: sudo sh scripts/consul.sh
 
