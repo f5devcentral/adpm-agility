@@ -43,8 +43,7 @@ jobs:
           echo "This is the student id from payload = ${{ github.event.client_payload.student_id }}"
           echo "This is the app name from payload = ${{ github.event.client_payload.app_name }}"
 
-      - name: install consul client
-        run: sudo sh scripts/consul.sh
+       
 
       - name: get consul server parameters
         id: consul_params
@@ -289,3 +288,12 @@ jobs:
       - name: update time on k/v store
         run: echo `date +"%Y%m%d.%H%M%S%2N"` | consul kv put -http-addr=${{ needs.build.outputs.consul_server }} adpm/labs/agility/students/${{ needs.build.outputs.student_id }}/scaling/bigip/last_modified_time -
 
+  reset_run_flag:
+    runs-on: ubuntu-latest
+    env:
+      ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+    needs: build
+    steps:
+      - name: reset run flag
+        run: |
+          consul kv put -http-addr=${{ needs.build.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/apps/${{ github.event.client_payload.app_name }}/is_running false
