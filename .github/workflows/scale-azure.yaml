@@ -80,8 +80,8 @@ jobs:
         run: |
           echo ::set-output name=bigip_min::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/common/scaling/bigip/min)
           echo ::set-output name=bigip_max::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/common/scaling/bigip/max)
-          echo ::set-output name=app_min::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/common/scaling/apps/${{ github.event.client_payload.app_name }}/min)
-          echo ::set-output name=app_max::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/common/scaling/apps/${{ github.event.client_payload.app_name }}/max)
+          echo ::set-output name=app_min::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/common/scaling/apps/min)
+          echo ::set-output name=app_max::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/common/scaling/apps/max)
 
       - name: output min and max values
         run: |
