@@ -294,6 +294,9 @@ jobs:
       ACTIONS_ALLOW_UNSECURE_COMMANDS: true
     needs: build
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        
       - name: install consul client
         run: sudo sh scripts/consul.sh
 
