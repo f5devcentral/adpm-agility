@@ -64,8 +64,8 @@ jobs:
       - name: check scaling interval
         id: last_modified
         run: |
-          echo ::set-output name=bigip_last_modified::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.outputs.student_id }}/scaling/bigip/last_modified_timestamp)
-          echo ::set-output name=app_last_modified::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.outputs.student_id }}/scaling/apps/${{ github.event.client_payload.app_name }}/last_modified_timestamp)
+          echo ::set-output name=bigip_last_modified_time::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.outputs.student_id }}/scaling/bigip/last_modified_timestamp)
+          echo ::set-output name=app_last_modified_timeupdate::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.outputs.student_id }}/scaling/apps/${{ github.event.client_payload.app_name }}/last_modified_timestamp)
 
       - name: output last modified times
         run: |
