@@ -62,7 +62,7 @@ jobs:
           echo ::set-output name=app_scaling_delta::$(expr date -d ${{ steps.last_modified.outputs.app_last_modified_time }} +%s - date +%s)
 
       - name: show scaling deltas
-        run: echo "App scaling delta in seconds is = ${{ steps.check_interval.outputs.app_scaling_delta"
+        run: echo "App scaling delta in seconds is = ${{ steps.check_interval.outputs.app_scaling_delta }}"
 
       - name: check if another running already
         id: check_running
