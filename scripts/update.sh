@@ -1,5 +1,5 @@
-cd ../terraform-automation/state_setup/
-terraform init && terraform plan && terraform apply --auto-approve
+cd ../workflow_automation/state_setup/
+terraform init && terraform apply --auto-approve
 sleep 10s
 
 cd ../deploy/

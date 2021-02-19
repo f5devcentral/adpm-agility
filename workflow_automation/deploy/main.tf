@@ -16,7 +16,8 @@ resource random_id id {
 
 locals {
   # Ids for multiple sets of EC2 instances, merged together
-  hostname    = format("bigip.azure.%s.com", local.student_id)
+  hostname          = format("bigip.azure.%s.com", local.student_id)
+  event_timestamp   = formatdate("YYYY-MM-DD hh:mm:ss",timestamp())
 }
 
 #
@@ -56,13 +57,11 @@ resource "null_resource" "azure-cli" {
   }
 }
 
-
-
 #
 #Create N-nic bigip
 #
 module bigip {
-  count 		     = local.bigip_count
+  count 		     = var.bigip_count
   source                     = "../f5module/"
   prefix                     = format("%s-2nic", var.prefix)
   resource_group_name        = azurerm_resource_group.rg.name
@@ -82,7 +81,7 @@ module bigip {
 
 resource "null_resource" "clusterDO" {
 
-  count = local.bigip_count
+  count = var.bigip_count
 
   provisioner "local-exec" {
     command = "cat > DO_2nic-instance${count.index}.json <<EOL\n ${module.bigip[count.index].onboard_do}\nEOL"
@@ -211,9 +210,3 @@ resource "azurerm_network_security_rule" "external_allow_ssh" {
   network_security_group_name = format("%s-external-public-nsg-%s", local.student_id, random_id.id.hex)
   depends_on                  = [module.external-network-security-group-public]
 }
-
-
-
-
-
-

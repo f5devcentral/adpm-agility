@@ -16,7 +16,8 @@ resource random_id id {
 
 locals {
   # Ids for multiple sets of EC2 instances, merged together
-  hostname    = format("bigip.azure.%s.com", local.student_id)
+  hostname          = format("bigip.azure.%s.com", local.student_id)
+  event_timestamp   = formatdate("YYYY-MM-DD hh:mm:ss",timestamp())
 }
 
 #
@@ -55,8 +56,6 @@ resource "null_resource" "azure-cli" {
     command = data.template_file.azure_cli_sh.rendered
   }
 }
-
-
 
 #
 #Create N-nic bigip
@@ -211,9 +210,3 @@ resource "azurerm_network_security_rule" "external_allow_ssh" {
   network_security_group_name = format("%s-external-public-nsg-%s", local.student_id, random_id.id.hex)
   depends_on                  = [module.external-network-security-group-public]
 }
-
-
-
-
-
-

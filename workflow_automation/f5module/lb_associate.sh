@@ -12,7 +12,7 @@ associateIP () {
 
 vipToConsul () {
   mycommand=$(az network nic ip-config show  -g ${rg_name} -n ${ip_config} --nic-name ${nic_name}  | jq '.privateIpAddress')
-  consul kv put -http-addr=3.95.15.85:8500 adpm/labs/agility/students/${student_id}/${instance_id}/vip $mycommand
+  consul kv put -http-addr=3.95.15.85:8500 adpm/labs/agility/students/${student_id}/scaling/apps/${app_name}/vip $mycommand
 
 }
 
