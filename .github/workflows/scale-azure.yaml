@@ -72,8 +72,8 @@ jobs:
         run: |
           echo "BIGIP last modified time = ${{ steps.last_modified.outputs.bigip_last_modified_time }}"
           echo "App last modified time = ${{ steps.last_modified.outputs.app_last_modified_time }}"
-          echo ::set-output name=bigip_modified_seconds::$(`date --date="@$${{ steps.last_modified.outputs.bigip_last_modified_time }}"`)
-          echo ::set-output name=app_modified_seconds::$(`date --date="@$${{ steps.last_modified.outputs.app_last_modified_time }}"`)
+          echo ::set-output name=bigip_modified_seconds::$(`date --date="@${{ steps.last_modified.outputs.bigip_last_modified_time }}"`)
+          echo ::set-output name=app_modified_seconds::$(`date --date="@${{ steps.last_modified.outputs.app_last_modified_time }}"`)
 
       - name: output time seconds
         run: |
