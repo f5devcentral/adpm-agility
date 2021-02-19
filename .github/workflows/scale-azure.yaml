@@ -22,13 +22,13 @@ jobs:
     steps:
 
       - name: grab current time
-        id: current_time
-        run: echo ::set-output name=current_time::$(date +%s)
+        id: current_time_seconds
+        run: echo ::set-output name=current_time_seconds::$(date +%s)
       
       - name: show current time
         run: |
-          echo "The current time in seconds is = ${{ steps.current_time.outputs.current_time }}"
-          echo "The current time in date format is = `date --date="@${{ steps.current_time.outputs.current_time }}"`"
+          echo "The current time in seconds is = ${{ steps.current_time_seconds.outputs.current_time_seconds }}"
+          echo "The current time in date format is = `date --date="@${{ steps.current_time_seconds.outputs.current_time_seconds }}"`"
       
 
       
@@ -83,7 +83,7 @@ jobs:
       - name: check interval
         id: check_interval
         run: |
-          echo ::set-output name=app_scaling_delta::$(expr `date --date="${{ steps.last_modified.outputs.app_last_modified_timestamp }}"` +%s - `date +%s`)
+          echo ::set-output name=app_scaling_delta::$(${{ steps.current_time_seconds.outputs.current_time_seconds }} - ${{ steps.seconds.outputs.app_modified_seconds }})
 
       - name: show scaling deltas
         run: echo "App scaling delta in seconds is = ${{ steps.check_interval.outputs.app_scaling_delta }}"
