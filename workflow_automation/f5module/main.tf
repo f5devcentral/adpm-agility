@@ -305,6 +305,7 @@ data "template_file" "azure_cli_add_sh" {
     lb_name         = format("%s-loadbalancer", local.student_id)   
     student_id      = local.student_id
     instance_id     = local.instance_prefix
+    app_name        = var.app_name
   }
 }
 
@@ -323,7 +324,7 @@ data "consul_keys" "vip" {
   # Read the vip address from Consul
   key {
     name    = "vip_address"
-    path    = format("adpm/labs/agility/students/%s/%s/vip", local.student_id, local.instance_prefix)
+    path    = format("adpm/labs/agility/students/%s/scaling/apps/%s/vip", local.student_id, var.app_name)
   }
 }
 
