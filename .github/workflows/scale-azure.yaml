@@ -28,7 +28,7 @@ jobs:
       - name: show current time
         run: |
           echo "The current time in seconds is = ${{ steps.current_time.outputs.current_time }}"
-          echo "The current time in date format is = `date -d ${{ steps.current_time.outputs.current_time }}`"
+          echo "The current time in date format is = `date -d @${{ steps.current_time.outputs.current_time }}`"
       
       - name: Checkout
         uses: actions/checkout@v2
