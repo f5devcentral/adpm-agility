@@ -21,6 +21,15 @@ jobs:
       consul_server: ${{ steps.consul_params.outputs.consul_server }}
     steps:
 
+      - name: grab current time
+        id: current_time
+        run: echo ::set-output name=current_time::$(date +%s)
+      
+      - name: show current time
+        run: |
+          echo "The current time in seconds is = ${{ steps.current_time.outputs.current_time }}"
+          echo "The current time in date format is = `date -d ${{ steps.current_time.outputs.current_time }}`"
+      
       - name: Checkout
         uses: actions/checkout@v2
   
