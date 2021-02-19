@@ -75,7 +75,7 @@ jobs:
       - name: check interval
         id: check_interval
         run: |
-          echo ::set-output name=app_scaling_delta::$(expr ((`date --date="${{ steps.last_modified.outputs.app_last_modified_timestamp }}"` +%s) - (`date +%s`)))
+          echo ::set-output name=app_scaling_delta::$(expr `date --date="${{ steps.last_modified.outputs.app_last_modified_timestamp }}"` +%s - `date +%s`)
 
       - name: show scaling deltas
         run: echo "App scaling delta in seconds is = ${{ steps.check_interval.outputs.app_scaling_delta }}"
