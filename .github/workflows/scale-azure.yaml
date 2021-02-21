@@ -287,7 +287,7 @@ jobs:
       - name: terraform apply state_setup
         run: |
           cd ./workflow_automation/state_setup
-          terraform apply --auto-approve 'bigip_count=${{ needs.setup.outputs.bigip_count }}' -var 'app_count=${{ needs.setup.outputs.app_count }}' -var 'student_id=${{ needs.setup.outputs.student_id }}'  
+          terraform apply --auto-approve -var 'bigip_count=${{ needs.setup.outputs.bigip_count }}' -var 'app_count=${{ needs.setup.outputs.app_count }}' -var 'student_id=${{ needs.setup.outputs.student_id }}'  
     
       - name: terraform init deploy
         run: |
@@ -334,7 +334,7 @@ jobs:
             if [[ "${{ github.event.client_payload.scaling_type }}" == "bigip" ]]; then
              consul kv put -http-addr=${{ needs.setup.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/bigip/is_running false
             else
-              consul kv put -http-addr=${{ needs.setup.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/bigip/${{ github.event.client_payload.app_name }}/is_running false
+              consul kv put -http-addr=${{ needs.setup.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/apps/${{ github.event.client_payload.app_name }}/is_running false
             fi
           fi
 
