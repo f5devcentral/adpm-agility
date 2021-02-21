@@ -273,24 +273,6 @@ jobs:
             tenant_id=${{ secrets.AZURE_TENANT_ID }}
             client_secret=${{ secrets.AZURE_CLIENT_SECRET }}
       
-      # - name: install azure cli client
-      #   run: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-
-      # - name: terraform init initialize azure
-      #   run: |
-      #     cd ./workflow_automation/azure_rm
-      #     terraform init
-
-      # - name: terraform plan initialize azure
-      #   run: |
-      #     cd ./workflow_automation/azure_rm
-      #     terraform plan
-
-      # - name: terraform apply initialize azure
-      #   run: |
-      #     cd ./workflow_automation/azure_rm
-      #     terraform apply --auto-approve      
-
       - name: terraform init state_setup
         run: |
           cd ./workflow_automation/state_setup
