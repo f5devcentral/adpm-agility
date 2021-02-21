@@ -29,9 +29,7 @@ jobs:
         run: |
           echo "The current time in seconds is = ${{ steps.current_time_seconds.outputs.current_time_seconds }}"
           echo "The current time in date format is = `date --date="@${{ steps.current_time_seconds.outputs.current_time_seconds }}"`"
-      
-
-      
+            
       - name: Checkout
         uses: actions/checkout@v2
   
@@ -89,7 +87,7 @@ jobs:
         run: echo "App scaling delta in seconds is = ${{ steps.check_interval.outputs.app_scaling_delta }}"
 
       - name: check if another running already
-        id: check_running
+        id: get_is_running
         run: |
           if [[ "${{ github.event.client_payload.scaling_type }}" == "bigip" ]]; then
             echo ::set-output name=is_running::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.outputs.student_id }}/scaling/bigip/is_running)
@@ -104,7 +102,7 @@ jobs:
 
       - name: do we run?
         run: |
-          if [[ "${{ steps.check_running.outputs.is_running }}" == "true" ]]; then
+          if [[ "${{ steps.get_is_running.outputs.is_running }}" == "true" ]]; then
             echo "WE ARE ABORTING BECAUSE ANOTHER RUNNING"
             exit 1
           else
@@ -214,7 +212,7 @@ jobs:
         run: echo "CANNOT scale to the desired capacity" 
 
   scale:
-    if: needs.build.outputs.can_scale == 'true' && 0==1
+    if: needs.build.outputs.can_scale == 'true'
     runs-on: ubuntu-latest
     env:
       ACTIONS_ALLOW_UNSECURE_COMMANDS: true
@@ -228,8 +226,9 @@ jobs:
           echo "This is the can_scale variable from build step = ${{ needs.build.outputs.can_scale }}"
           echo "this is the app instance count = ${{ steps.test.outputs.app_count }}"
           echo "This is the app_count variable from build step = ${{ needs.build.outputs.app_count }}"
+          echo "This is the bigip_count variable from build step = ${{ needs.build.outputs.bigip_count }}"
           echo "this is the student number = ${{ needs.build.outputs.student_id }}"
-          echo "this is the scaling_type = ${{ needs.build.outputs.scaling }}"
+          echo "this is the scaling_type = ${{ needs.build.outputs.scaling_type }}"
           echo "this is the current count = ${{ needs.build.outputs.current_count }}"
       
       - name: scaling in 
@@ -266,8 +265,8 @@ jobs:
       - name: process template file using jinja2
         uses: cuchi/jinja2-action@v1.2.0
         with:
-          template: ./terraform-automation/deploy/main.tpl
-          output_file: ./terraform-automation/deploy/main.tf
+          template: ./workflow_automation/deploy/main.tpl
+          output_file: ./workflow_automation/deploy/main.tf
           variables: |
             client_id=${{ secrets.AZURE_CLIENT_ID }}
             subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}
@@ -279,54 +278,54 @@ jobs:
 
       # - name: terraform init initialize azure
       #   run: |
-      #     cd ./terraform-automation/azure_rm
+      #     cd ./workflow_automation/azure_rm
       #     terraform init
 
       # - name: terraform plan initialize azure
       #   run: |
-      #     cd ./terraform-automation/azure_rm
+      #     cd ./workflow_automation/azure_rm
       #     terraform plan
 
       # - name: terraform apply initialize azure
       #   run: |
-      #     cd ./terraform-automation/azure_rm
+      #     cd ./workflow_automation/azure_rm
       #     terraform apply --auto-approve      
 
       - name: terraform init state_setup
         run: |
-          cd ./terraform-automation/state_setup
+          cd ./workflow_automation/state_setup
           terraform init
       
       - name: terraform plan state_setup
         run: |
-          cd ./terraform-automation/state_setup
-          terraform plan -var 'instance_count=${{ needs.build.outputs.new_count }}' -var 'student_id=${{ needs.build.outputs.student_id }}' 
+          cd ./workflow_automation/state_setup
+          terraform plan -var 'bigip_count=${{ needs.build.outputs.bigip_count }}' -var 'app_count=${{ needs.build.outputs.app_count }}' -var 'student_id=${{ needs.build.outputs.student_id }}' 
        
       - name: terraform apply state_setup
         run: |
-          cd ./terraform-automation/state_setup
-          terraform apply --auto-approve -var 'instance_count=${{ needs.build.outputs.new_count }}' -var 'student_id=${{ needs.build.outputs.student_id }}' 
+          cd ./workflow_automation/state_setup
+          terraform apply --auto-approve 'bigip_count=${{ needs.build.outputs.bigip_count }}' -var 'app_count=${{ needs.build.outputs.app_count }}' -var 'student_id=${{ needs.build.outputs.student_id }}'  
     
       - name: terraform init deploy
         run: |
-          cd ./terraform-automation/deploy
+          cd ./workflow_automation/deploy
           terraform init 
       
       - name: terraform plan deploy
         run: |
-          cd ./terraform-automation/deploy
+          cd ./workflow_automation/deploy
           terraform plan 
        
       - name: terraform apply deploy
         run: |
-          cd ./terraform-automation/deploy
+          cd ./workflow_automation/deploy
           terraform apply --auto-approve 
       
       - name: install consul client
         run: sudo sh scripts/consul.sh
 
       - name: update time on k/v store
-        run: echo `date +"%Y%m%d.%H%M%S%2N"` | consul kv put -http-addr=${{ needs.build.outputs.consul_server }} adpm/labs/agility/students/${{ needs.build.outputs.student_id }}/scaling/bigip/last_modified_time -
+        run: echo `date '+%Y-%m-%d %H:%M:%S'` | consul kv put -http-addr=${{ needs.build.outputs.consul_server }} adpm/labs/agility/students/${{ needs.build.outputs.student_id }}/scaling/bigip/last_modified_time -
 
   reset_run_flag:
     runs-on: ubuntu-latest
