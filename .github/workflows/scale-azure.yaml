@@ -276,6 +276,7 @@ jobs:
       
       - name: terraform init state_setup
         run: |
+          echo ::set-env name=CONSUL_HTTP_TOKEN::${{ secrets.CONSUL_HTTP_TOKEN }}
           cd ./workflow_automation/state_setup
           terraform init
       
@@ -326,7 +327,9 @@ jobs:
         uses: actions/checkout@v2
 
       - name: install consul client
-        run: sudo sh scripts/consul.sh
+        run: |
+          echo ::set-env name=CONSUL_HTTP_TOKEN::${{ secrets.CONSUL_HTTP_TOKEN }}
+          sudo sh scripts/consul.sh
 
       - name: reset run flag
         run: |
