@@ -3,10 +3,9 @@ on:
   repository_dispatch:
     types:
       - scale-azure
-
 jobs:
-  build:
-    name: build
+  setup:
+    name: setup
     runs-on: ubuntu-latest
     env:
      ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
@@ -17,21 +16,19 @@ jobs:
       bigip_count: ${{ steps.test.outputs.bigip_count }}
       student_id: ${{ steps.client_payload_data.outputs.student_id }}
       current_count: ${{ steps.student_data.outputs.bigip_instance_count }}
-      scaling: ${{ github.event.client_payload.scaling_direction }}
+      scaling_direction: ${{ github.event.client_payload.scaling_direction }}
       consul_server: ${{ steps.consul_params.outputs.consul_server }}
     steps:
 
       - name: grab current time
-        id: current_time
-        run: echo ::set-output name=current_time::$(date +%s)
+        id: current_time_seconds
+        run: echo ::set-output name=current_time_seconds::$(date +%s)
       
       - name: show current time
         run: |
-          echo "The current time in seconds is = ${{ steps.current_time.outputs.current_time }}"
-          echo "The current time in date format is = `date --date="@${{ steps.current_time.outputs.current_time }}"`"
-      
-
-      
+          echo "The current time in seconds is = ${{ steps.current_time_seconds.outputs.current_time_seconds }}"
+          echo "The current time in date format is = `date --date="@${{ steps.current_time_seconds.outputs.current_time_seconds }}"`"
+            
       - name: Checkout
         uses: actions/checkout@v2
   
@@ -65,15 +62,15 @@ jobs:
         id: last_modified
         run: |
           echo ::set-output name=bigip_last_modified_time::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.outputs.student_id }}/scaling/bigip/last_modified_timestamp)
-          echo ::set-output name=app_last_modified_timeupdate::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.outputs.student_id }}/scaling/apps/${{ github.event.client_payload.app_name }}/last_modified_timestamp)
+          echo ::set-output name=app_last_modified_time::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.outputs.student_id }}/scaling/apps/${{ github.event.client_payload.app_name }}/last_modified_timestamp)
 
       - name: output last modified times
         id: seconds
         run: |
           echo "BIGIP last modified time = ${{ steps.last_modified.outputs.bigip_last_modified_time }}"
           echo "App last modified time = ${{ steps.last_modified.outputs.app_last_modified_time }}"
-          echo ::set-output name=bigip_modified_seconds::$(`date --date="@$${{ steps.last_modified.outputs.bigip_last_modified_time }}"`)
-          echo ::set-output name=app_modified_seconds::$(`date --date="@$${{ steps.last_modified.outputs.app_last_modified_time }}"`)
+          echo ::set-output name=bigip_modified_seconds::$(date --date="${{ steps.last_modified.outputs.bigip_last_modified_time }}" +%s)
+          echo ::set-output name=app_modified_seconds::$(date --date="${{ steps.last_modified.outputs.app_last_modified_time }}" +%s)
 
       - name: output time seconds
         run: |
@@ -83,13 +80,13 @@ jobs:
       - name: check interval
         id: check_interval
         run: |
-          echo ::set-output name=app_scaling_delta::$(expr `date --date="${{ steps.last_modified.outputs.app_last_modified_timestamp }}"` +%s - `date +%s`)
+          echo ::set-output name=app_scaling_delta::$(expr ${{ steps.current_time_seconds.outputs.current_time_seconds }} - ${{ steps.seconds.outputs.app_modified_seconds }})
 
       - name: show scaling deltas
         run: echo "App scaling delta in seconds is = ${{ steps.check_interval.outputs.app_scaling_delta }}"
 
       - name: check if another running already
-        id: check_running
+        id: get_is_running
         run: |
           if [[ "${{ github.event.client_payload.scaling_type }}" == "bigip" ]]; then
             echo ::set-output name=is_running::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.outputs.student_id }}/scaling/bigip/is_running)
@@ -103,12 +100,14 @@ jobs:
 
 
       - name: do we run?
+        id: check_running
         run: |
-          if [[ "${{ steps.check_running.outputs.is_running }}" == "true" ]]; then
+          if [[ "${{ steps.get_is_running.outputs.is_running }}" == "true" ]]; then
             echo "WE ARE ABORTING BECAUSE ANOTHER RUNNING"
             exit 1
           else
-            consul kv put -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/apps/${{ github.event.client_payload.app_name }}/is_running true           
+            consul kv put -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/apps/${{ github.event.client_payload.app_name }}/is_running true
+            echo ::set-output name=we_set_running::'true'           
             echo "Good to go!"
           fi
 
@@ -214,30 +213,31 @@ jobs:
         run: echo "CANNOT scale to the desired capacity" 
 
   scale:
-    if: needs.build.outputs.can_scale == 'true' && 0==1
+    if: needs.setup.outputs.can_scale == 'true'
     runs-on: ubuntu-latest
     env:
       ACTIONS_ALLOW_UNSECURE_COMMANDS: true
-    needs: build
+    needs: setup
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
       - name: output environment variable
         run: |
-          echo "This is the can_scale variable from build step = ${{ needs.build.outputs.can_scale }}"
+          echo "This is the can_scale variable from build step = ${{ needs.setup.outputs.can_scale }}"
           echo "this is the app instance count = ${{ steps.test.outputs.app_count }}"
-          echo "This is the app_count variable from build step = ${{ needs.build.outputs.app_count }}"
-          echo "this is the student number = ${{ needs.build.outputs.student_id }}"
-          echo "this is the scaling_type = ${{ needs.build.outputs.scaling }}"
-          echo "this is the current count = ${{ needs.build.outputs.current_count }}"
+          echo "This is the app_count variable from build step = ${{ needs.setup.outputs.app_count }}"
+          echo "This is the bigip_count variable from build step = ${{ needs.setup.outputs.bigip_count }}"
+          echo "this is the student number = ${{ needs.setup.outputs.student_id }}"
+          echo "this is the scaling_type = ${{ needs.setup.outputs.scaling_type }}"
+          echo "this is the current count = ${{ needs.setup.outputs.current_count }}"
       
       - name: scaling in 
-        if: needs.build.outputs.scaling == 'in'
+        if: needs.setup.outputs.scaling_direction == 'in'
         run: echo "scaling in" 
 
       - name: scaling out
-        if: needs.build.outputs.scaling == 'out'
+        if: needs.setup.outputs.scaling_direction == 'out'
         run: echo "scaling out"
 
       # - name: login to azure
@@ -266,80 +266,78 @@ jobs:
       - name: process template file using jinja2
         uses: cuchi/jinja2-action@v1.2.0
         with:
-          template: ./terraform-automation/deploy/main.tpl
-          output_file: ./terraform-automation/deploy/main.tf
+          template: ./workflow_automation/deploy/main.tpl
+          output_file: ./workflow_automation/deploy/main.tf
           variables: |
             client_id=${{ secrets.AZURE_CLIENT_ID }}
             subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}
             tenant_id=${{ secrets.AZURE_TENANT_ID }}
             client_secret=${{ secrets.AZURE_CLIENT_SECRET }}
       
-      # - name: install azure cli client
-      #   run: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-
-      # - name: terraform init initialize azure
-      #   run: |
-      #     cd ./terraform-automation/azure_rm
-      #     terraform init
-
-      # - name: terraform plan initialize azure
-      #   run: |
-      #     cd ./terraform-automation/azure_rm
-      #     terraform plan
-
-      # - name: terraform apply initialize azure
-      #   run: |
-      #     cd ./terraform-automation/azure_rm
-      #     terraform apply --auto-approve      
-
       - name: terraform init state_setup
         run: |
-          cd ./terraform-automation/state_setup
+          echo ::set-env name=CONSUL_HTTP_TOKEN::${{ secrets.CONSUL_HTTP_TOKEN }}
+          cd ./workflow_automation/state_setup
           terraform init
       
       - name: terraform plan state_setup
         run: |
-          cd ./terraform-automation/state_setup
-          terraform plan -var 'instance_count=${{ needs.build.outputs.new_count }}' -var 'student_id=${{ needs.build.outputs.student_id }}' 
+          cd ./workflow_automation/state_setup
+          terraform plan -var 'bigip_count=${{ needs.setup.outputs.bigip_count }}' -var 'app_count=${{ needs.setup.outputs.app_count }}' -var 'student_id=${{ needs.setup.outputs.student_id }}' 
        
       - name: terraform apply state_setup
         run: |
-          cd ./terraform-automation/state_setup
-          terraform apply --auto-approve -var 'instance_count=${{ needs.build.outputs.new_count }}' -var 'student_id=${{ needs.build.outputs.student_id }}' 
+          cd ./workflow_automation/state_setup
+          terraform apply --auto-approve -var 'bigip_count=${{ needs.setup.outputs.bigip_count }}' -var 'app_count=${{ needs.setup.outputs.app_count }}' -var 'student_id=${{ needs.setup.outputs.student_id }}'  
     
       - name: terraform init deploy
         run: |
-          cd ./terraform-automation/deploy
+          cd ./workflow_automation/deploy
           terraform init 
       
-      - name: terraform plan deploy
+      - name: terraform plan /deploy
         run: |
-          cd ./terraform-automation/deploy
-          terraform plan 
+          cd ./workflow_automation/deploy
+          terraform plan -var 'bigip_count=${{ needs.setup.outputs.bigip_count }}'
        
-      - name: terraform apply deploy
+      - name: terraform apply /deploy
         run: |
-          cd ./terraform-automation/deploy
-          terraform apply --auto-approve 
+          cd ./workflow_automation/deploy
+          terraform apply --auto-approve -var 'bigip_count=${{ needs.setup.outputs.bigip_count }}'
       
       - name: install consul client
         run: sudo sh scripts/consul.sh
 
       - name: update time on k/v store
-        run: echo `date +"%Y%m%d.%H%M%S%2N"` | consul kv put -http-addr=${{ needs.build.outputs.consul_server }} adpm/labs/agility/students/${{ needs.build.outputs.student_id }}/scaling/bigip/last_modified_time -
+        run: |
+          if [[ "${{ github.event.client_payload.scaling_type }}" == "bigip" ]]; then
+            echo `date '+%Y-%m-%d %H:%M:%S'` | consul kv put -http-addr=${{ needs.setup.outputs.consul_server }} adpm/labs/agility/students/${{ needs.setup.outputs.student_id }}/scaling/bigip/last_modified_time -
+          else
+            echo `date '+%Y-%m-%d %H:%M:%S'` | consul kv put -http-addr=${{ needs.setup.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/apps/${{ github.event.client_payload.app_name }}/last_modified_time -
+          fi
 
   reset_run_flag:
+    if: always()
     runs-on: ubuntu-latest
     env:
       ACTIONS_ALLOW_UNSECURE_COMMANDS: true
-    needs: build
+    needs: [setup, scale]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
       - name: install consul client
-        run: sudo sh scripts/consul.sh
+        run: |
+          echo ::set-env name=CONSUL_HTTP_TOKEN::${{ secrets.CONSUL_HTTP_TOKEN }}
+          sudo sh scripts/consul.sh
 
       - name: reset run flag
         run: |
-          consul kv put -http-addr=${{ needs.build.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/apps/${{ github.event.client_payload.app_name }}/is_running false
+          if [[ needs.setup.outputs.we_set_running == 'true' ]]; then
+            if [[ "${{ github.event.client_payload.scaling_type }}" == "bigip" ]]; then
+             consul kv put -http-addr=${{ needs.setup.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/bigip/is_running false
+            else
+              consul kv put -http-addr=${{ needs.setup.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/apps/${{ github.event.client_payload.app_name }}/is_running false
+            fi
+          fi
+

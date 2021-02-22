@@ -15,6 +15,10 @@ variable app_name {
   default = "app1"
 }
 
+variable bigip_count {
+  default = 0
+}
+
 variable prefix {
   description = "Prefix for resources created by this module"
   type        = string
