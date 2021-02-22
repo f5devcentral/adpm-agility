@@ -266,8 +266,19 @@ jobs:
       - name: process template file using jinja2
         uses: cuchi/jinja2-action@v1.2.0
         with:
-          template: ./workflow_automation/deploy/main.tpl
-          output_file: ./workflow_automation/deploy/main.tf
+          template: ./workflow_automation/deploy/providers.tpl
+          output_file: ./workflow_automation/deploy/providers.tf
+          variables: |
+            client_id=${{ secrets.AZURE_CLIENT_ID }}
+            subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}
+            tenant_id=${{ secrets.AZURE_TENANT_ID }}
+            client_secret=${{ secrets.AZURE_CLIENT_SECRET }}
+      
+      - name: process template file using jinja2
+        uses: cuchi/jinja2-action@v1.2.0
+        with:
+          template: ./workflow_automation/f5module/providers.tpl
+          output_file: ./workflow_automation/f5module/providers.tf
           variables: |
             client_id=${{ secrets.AZURE_CLIENT_ID }}
             subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}
