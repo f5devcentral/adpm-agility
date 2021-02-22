@@ -18,6 +18,7 @@ jobs:
       current_count: ${{ steps.student_data.outputs.bigip_instance_count }}
       scaling_direction: ${{ github.event.client_payload.scaling_direction }}
       consul_server: ${{ steps.consul_params.outputs.consul_server }}
+      we_set_running: ${{ steps.check_running.outputs.we_set_running }}
     steps:
 
       - name: grab current time
