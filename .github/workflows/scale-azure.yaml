@@ -310,12 +310,12 @@ jobs:
       - name: terraform plan /deploy
         run: |
           cd ./workflow_automation/deploy
-          terraform plan -var 'bigip_count=${{ needs.setup.outputs.bigip_count }}'
+          terraform plan
        
       - name: terraform apply /deploy
         run: |
           cd ./workflow_automation/deploy
-          terraform apply --auto-approve -var 'bigip_count=${{ needs.setup.outputs.bigip_count }}'
+          terraform apply --auto-approve 
       
       - name: install consul client
         run: sudo sh scripts/consul.sh
