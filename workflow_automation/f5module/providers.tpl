@@ -1,7 +1,7 @@
 terraform {
   required_version = "~> 0.13"
   required_providers {
-      azurerm = {
+      azurerm {
          source = "hashicorp/azurerm"
 	       version = "~>2.28.0"
         client_id = "{{ client_id }}"
