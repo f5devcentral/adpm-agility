@@ -4,12 +4,6 @@ terraform {
       azurerm = {
          source = "hashicorp/azurerm"
 	       version = "~>2.28.0"
-         client_id = "{​​{​​ client_id }​​}​​"
-        subscription_id = "{​​{​​ subscription_id }​​}​​"
-        tenant_id = "{​​{​​ tenant_id }​​}​​"
-        client_secret = "{​​{​​ client_secret }​​}​​"
-    features {}
-
        }
        random = {
          source = "hashicorp/random"
@@ -24,4 +18,12 @@ terraform {
          version = "~>2.1.2"
       }
  } 
+}
+
+provider azurerm {
+  client_id = "{​​{​​ client_id }​​}​​"
+  subscription_id = "{​​{​​ subscription_id }​​}​​"
+  tenant_id = "{​​{​​ tenant_id }​​}​​"
+  client_secret = "{​​{​​ client_secret }​​}​​"
+    features {}
 }
