@@ -6,7 +6,7 @@ sudo rm -rf consul
 sudo apt-get install unzip -y
 
 #Download Consul
-CONSUL_VERSION="1.8.0"
+CONSUL_VERSION="1.9.3"
 curl --silent --remote-name https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_amd64.zip
 
 #Install Consul
