@@ -9,6 +9,8 @@ sudo apt-get install unzip -y
 CONSUL_VERSION="1.9.3"
 curl --silent --remote-name https://releases.hashicorp.com/consul/${CONSUL_VERSION}/consul_${CONSUL_VERSION}_linux_amd64.zip
 
+https://releases.hashicorp.com/consul/1.9.3/consul_1.9.3_linux_amd64.zip
+
 #Install Consul
 sudo unzip -o consul_${CONSUL_VERSION}_linux_amd64.zip
 sudo chown root:root consul
