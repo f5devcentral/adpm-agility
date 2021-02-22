@@ -17,7 +17,6 @@ terraform {
 }
 
 provider azurerm {
-  source = "hashicorp/azurerm"
 	version = "~>2.28.0"
   client_id = "{​​{​​ client_id }​​}​​"
   subscription_id = "{​​{​​ subscription_id }​​}​​"
