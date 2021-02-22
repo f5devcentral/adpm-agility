@@ -44,8 +44,8 @@ data "template_file" "ts_json" {
 
   vars = {
     #region          = data.azurerm_resource_group.bigiprg.location
-    #law_id          = var.law_id
-    #law_primarykey  = var.law_primarykey
+    law_id          = var.law_id
+    law_primarykey  = var.law_primarykey
     logStashIP       = "10.2.1.125"
 
   }
