@@ -36,30 +36,6 @@
             "class": "Provision",
             "ltm": "nominal",
             "avr": "nominal"
-        },
-        "external": {
-            "class": "VLAN",
-            "tag": 4094,
-            "mtu": 1500,
-            "interfaces": [
-                {
-                    "name": "1.1",
-                    "tagged": false
-                }
-            ]
-        },
-        "external-localself": {
-            "class": "SelfIp",
-            "address": "${local_selfip}/24",
-            "vlan": "external",
-            "allowService": "default",
-            "trafficGroup": "traffic-group-local-only"
-        },
-        "default": {
-            "class": "Route",
-            "gw": "${gateway}",
-            "network": "default",
-            "mtu": 1500
         }
     }
 }

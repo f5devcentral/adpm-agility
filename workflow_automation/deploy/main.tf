@@ -57,20 +57,22 @@ resource "null_resource" "azure-cli" {
   }
 }
 
+
 #
 #Create N-nic bigip
 #
 module bigip {
-  count 		     = var.bigip_count
+  count 		     = local.bigip_count
   source                     = "../f5module/"
-  prefix                     = format("%s-2nic", var.prefix)
+  prefix                     = format("%s-1nic", var.prefix)
   resource_group_name        = azurerm_resource_group.rg.name
   mgmt_subnet_ids            = [{ "subnet_id" = data.azurerm_subnet.mgmt.id, "public_ip" = true, "private_ip_primary" =  ""}]
   mgmt_securitygroup_ids     = [module.mgmt-network-security-group.network_security_group_id]
-  external_subnet_ids        = [{ "subnet_id" = data.azurerm_subnet.external-public.id, "public_ip" = true,"private_ip_primary" = "", "private_ip_secondary" = ""}]
-  external_securitygroup_ids = [module.external-network-security-group-public.network_security_group_id]
   availabilityZones          = var.availabilityZones
   app_name                   = var.app_name 
+  law_id                     = azurerm_log_analytics_workspace.law.workspace_id
+  law_primarykey             = azurerm_log_analytics_workspace.law.primary_shared_key
+
   providers = {
     consul = consul
   }
@@ -81,14 +83,14 @@ module bigip {
 
 resource "null_resource" "clusterDO" {
 
-  count = var.bigip_count
+  count = local.bigip_count
 
   provisioner "local-exec" {
-    command = "cat > DO_2nic-instance${count.index}.json <<EOL\n ${module.bigip[count.index].onboard_do}\nEOL"
+    command = "cat > DO_1nic-instance${count.index}.json <<EOL\n ${module.bigip[count.index].onboard_do}\nEOL"
   }
   provisioner "local-exec" {
     when    = destroy
-    command = "rm -rf DO_2nic-instance${count.index}.json"
+    command = "rm -rf DO_1nic-instance${count.index}.json"
   }
   depends_on = [ module.bigip.onboard_do]
 }
@@ -103,8 +105,8 @@ module "network" {
   vnet_name           = format("%s-vnet-%s", local.student_id, random_id.id.hex)
   resource_group_name = azurerm_resource_group.rg.name
   address_space       = [var.cidr]
-  subnet_prefixes     = [cidrsubnet(var.cidr, 8, 1), cidrsubnet(var.cidr, 8, 2)]
-  subnet_names        = ["mgmt-subnet", "external-public-subnet"]
+  subnet_prefixes     = [cidrsubnet(var.cidr, 8, 1)]
+  subnet_names        = ["mgmt-subnet"]
 
   tags = {
     environment = "dev"
@@ -114,13 +116,6 @@ module "network" {
 
 data "azurerm_subnet" "mgmt" {
   name                 = "mgmt-subnet"
-  virtual_network_name = module.network.vnet_name
-  resource_group_name  = azurerm_resource_group.rg.name
-  depends_on           = [module.network]
-}
-
-data "azurerm_subnet" "external-public" {
-  name                 = "external-public-subnet"
   virtual_network_name = module.network.vnet_name
   resource_group_name  = azurerm_resource_group.rg.name
   depends_on           = [module.network]
@@ -142,15 +137,6 @@ module mgmt-network-security-group {
 #
 # Create the Network Security group Module to associate with BIGIP-External-Nic
 #
-module external-network-security-group-public {
-  source              = "Azure/network-security-group/azurerm"
-  resource_group_name = azurerm_resource_group.rg.name
-  security_group_name = format("%s-external-public-nsg-%s", local.student_id, random_id.id.hex)
-  tags = {
-    environment = "dev"
-    costcenter  = "terraform"
-  }
-}
 
 resource "azurerm_network_security_rule" "mgmt_allow_https" {
   name                        = "Allow_Https"
@@ -180,33 +166,18 @@ resource "azurerm_network_security_rule" "mgmt_allow_ssh" {
   network_security_group_name = format("%s-mgmt-nsg-%s", local.student_id, random_id.id.hex)
   depends_on                  = [module.mgmt-network-security-group]
 }
-
-resource "azurerm_network_security_rule" "external_allow_https" {
-  name                        = "Allow_Https"
-  priority                    = 200
+resource "azurerm_network_security_rule" "mgmt_allow_https2" {
+  name                        = "Allow_Https_8443"
+  priority                    = 201
   direction                   = "Inbound"
   access                      = "Allow"
   protocol                    = "Tcp"
   source_port_range           = "*"
-  destination_port_range      = "443"
+  destination_port_range      = "8443"
   destination_address_prefix  = "*"
   source_address_prefixes     = var.AllowedIPs
   resource_group_name         = azurerm_resource_group.rg.name
-  network_security_group_name = format("%s-external-public-nsg-%s", local.student_id, random_id.id.hex)
-  depends_on                  = [module.external-network-security-group-public]
+  network_security_group_name = format("%s-mgmt-nsg-%s", local.student_id, random_id.id.hex)
+  depends_on                  = [module.mgmt-network-security-group]
 }
 
-resource "azurerm_network_security_rule" "external_allow_ssh" {
-  name                        = "Allow_ssh"
-  priority                    = 202
-  direction                   = "Inbound"
-  access                      = "Allow"
-  protocol                    = "Tcp"
-  source_port_range           = "*"
-  destination_port_range      = "22"
-  destination_address_prefix  = "*"
-  source_address_prefixes     = var.AllowedIPs
-  resource_group_name         = azurerm_resource_group.rg.name
-  network_security_group_name = format("%s-external-public-nsg-%s", local.student_id, random_id.id.hex)
-  depends_on                  = [module.external-network-security-group-public]
-}

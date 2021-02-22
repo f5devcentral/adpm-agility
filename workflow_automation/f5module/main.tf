@@ -37,7 +37,7 @@ locals {
     "internal_securitygroup_ids" = var.internal_securitygroup_ids
   }
 
-  upass = random_string.password.result
+  upass = "F5Student!"
 
   mgmt_public_subnet_id = [
     for subnet in local.bigip_map["mgmt_subnet_ids"] :
@@ -295,13 +295,12 @@ resource "azurerm_network_interface" "external_public_nic" {
 #
 
 data "template_file" "azure_cli_add_sh" {
-  count               = length(local.external_public_subnet_id)
+  count               = length(local.bigip_map["mgmt_subnet_ids"])
   template            = file("${path.module}/lb_associate.sh")
-  depends_on          = [azurerm_network_interface.external_public_nic]
   vars = {
     rg_name         = data.azurerm_resource_group.bigiprg.name
-    nic_name        = azurerm_network_interface.external_public_nic[count.index].name
-    ip_config       = "${local.instance_prefix}-ext-public-secondary-ip-${count.index}"
+    nic_name        = azurerm_network_interface.mgmt_nic[count.index].name
+    ip_config       = "${local.instance_prefix}-mgmt-ip-${count.index}"
     lb_name         = format("%s-loadbalancer", local.student_id)   
     student_id      = local.student_id
     instance_id     = local.instance_prefix
@@ -310,21 +309,12 @@ data "template_file" "azure_cli_add_sh" {
 }
 
 resource "null_resource" "azure_cli_add" {
-  count               = length(local.external_public_subnet_id)
+  count               = length(local.bigip_map["mgmt_subnet_ids"])
   depends_on          = [data.template_file.azure_cli_add_sh]  
   
   provisioner "local-exec" {
     # Call Azure CLI Script here
     command = element(data.template_file.azure_cli_add_sh.*.rendered,0)
-  }
-}
-
-data "consul_keys" "vip" {
-  depends_on = [null_resource.azure_cli_add]
-  # Read the vip address from Consul
-  key {
-    name    = "vip_address"
-    path    = format("adpm/labs/agility/students/%s/scaling/apps/%s/vip", local.student_id, var.app_name)
   }
 }
 
@@ -460,17 +450,13 @@ data "azurerm_public_ip" "f5vm01mgmtpip" {
   depends_on          = [azurerm_virtual_machine.f5vm, azurerm_virtual_machine_extension.vmext,azurerm_public_ip.mgmt_public_ip[0]]
 }
 
-data "template_file" "clustermemberDO2" {
-  count    = local.total_nics == 2 ? 1 : 0
-  template = file("${path.module}/onboard_do_2nic.tpl")
+data "template_file" "clustermemberDO1" {
+  count    = local.total_nics == 1 ? 1 : 0
+  template = file("${path.module}/onboard_do_1nic.tpl")
   vars = {
     hostname      = local.hostname
-    name_servers  = join(",", formatlist("\"%s\"", ["168.63.129.16"]))
+    name_servers  = join(",", formatlist("\"%s\"", ["169.254.169.253"]))
     search_domain = "f5.com"
-    ntp_servers   = join(",", formatlist("\"%s\"", ["0.pool.ntp.org", "1.pool.ntp.org", "2.pool.ntp.org"]))
-    vlan-name     = element(split("/", local.vlan_list[0]), length(split("/", local.vlan_list[0])) - 1)
-    self-ip       = local.selfip_list[0]
-    gateway       = join(".", concat(slice(split(".",local.gw_bytes_nic),0,3),[1]) )
+    ntp_servers   = join(",", formatlist("\"%s\"", ["169.254.169.123"]))
   }
-  depends_on = [azurerm_network_interface.external_nic, azurerm_network_interface.external_public_nic, azurerm_network_interface.internal_nic]
 }

@@ -106,7 +106,7 @@ CNT=0
 echo -e "\n"$(date) "Check DO Ready"
 while true
 do
-  STATUS=$(curl -u $CREDS -X GET -s -k -I https://localhost/mgmt/shared/declarative-onboarding/info | grep HTTP)
+  STATUS=$(curl -u $CREDS -X GET -s -k -I https://localhost:8443/mgmt/shared/declarative-onboarding/info | grep HTTP)
   if [[ $STATUS == *"200"* ]]; then
     echo -e "\n"$(date) "Got 200! DO is Ready!"
     break
@@ -125,7 +125,7 @@ CNT=0
 echo -e "\n"$(date) "Check AS3 Ready"
 while true
 do
-  STATUS=$(curl -u $CREDS -X GET -s -k -I https://localhost/mgmt/shared/appsvcs/info | grep HTTP)
+  STATUS=$(curl -u $CREDS -X GET -s -k -I https://localhost:8443/mgmt/shared/appsvcs/info | grep HTTP)
   if [[ $STATUS == *"200"* ]]; then
     echo -e "\n"$(date) "Got 200! AS3 is Ready!"
     break
@@ -144,7 +144,7 @@ CNT=0
 echo -e "\n"$(date) "Check TS Ready"
 while true
 do
-  STATUS=$(curl -u $CREDS -X GET -s -k -I https://localhost/mgmt/shared/telemetry/info | grep HTTP)
+  STATUS=$(curl -u $CREDS -X GET -s -k -I https://localhost:8443/mgmt/shared/telemetry/info | grep HTTP)
   if [[ $STATUS == *"200"* ]]; then
     echo -e "\n"$(date) "Got 200! TS is Ready!"
     break
@@ -208,13 +208,13 @@ sed -i "s/-external-self-address-/$local_selfip/g" /config/do.json
 
 # Submit DO Declaration
 echo -e "\n"$(date) "Submitting DO declaration"
-curl -u $CREDS -X POST -k https://localhost/$doUrl -d @/config/do.json
+curl -u $CREDS -X POST -k https://localhost:8443/$doUrl -d @/config/do.json
 
 # Check DO Task
 CNT=0
 while true
 do
-  STATUS=$(curl -u $CREDS -X GET -s -k https://localhost/$doTaskUrl)
+  STATUS=$(curl -u $CREDS -X GET -s -k https://localhost:8443/$doTaskUrl)
   if ( echo $STATUS | grep "OK" ); then
     echo -e "\n"$(date) "DO task successful"
     break
@@ -230,11 +230,11 @@ done
 
 # Submit TS Declaration
 echo -e "\n"$(date) "Submitting TS declaration"
-curl -u $CREDS -H "Content-Type: Application/json" -X POST -k https://localhost/$tsUrl -d @/config/ts.json
+curl -u $CREDS -H "Content-Type: Application/json" -X POST -k https://localhost:8443/$tsUrl -d @/config/ts.json
 
 # Submit AS3 Declaration
 echo -e "\n"$(date) "Submitting AS3 declaration"
-curl -u $CREDS -X POST -k https://localhost/$as3Url -d @/config/as3.json
+curl -u $CREDS -X POST -k https://localhost:8443/$as3Url -d @/config/as3.json
 
 # Delete declaration files (do.json, as3.json) packages
 #echo -e "\n"$(date) "Removing DO and AS3 declaration files"
@@ -244,6 +244,6 @@ curl -u $CREDS -X POST -k https://localhost/$as3Url -d @/config/as3.json
 
 # Enable AVR logging
 echo -e "\n"$(date) "posting AVR  TMSH command"
-tmsh modify analytics global-settings { external-logging-publisher /DemoTenant/DemoApp/telemetry_publisher offbox-protocol hsl use-offbox enabled  }
+tmsh modify analytics global-settings { external-logging-publisher /DemoTenant/${app_name}/telemetry_publisher offbox-protocol hsl use-offbox enabled  }
 
 echo -e "\n"$(date) "===Onboard Complete==="

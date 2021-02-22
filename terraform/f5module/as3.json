@@ -25,10 +25,16 @@
 					"class": "Service_HTTPS",
 					"virtualPort": 443,
 					"virtualAddresses": [
-						${local_selfip}
+						"0.0.0.0"
 					],
 					"pool": "${web_pool}",
-					"serverTLS": "webtls"
+					"serverTLS": "webtls",
+					"profileTrafficLog": {
+						"use": "telemetry_traffic_log_profile"
+					},
+					"profileAnalyticsTcp": {
+						"use": "telemetry_tcp_analytics_profile"
+					}
 				},
 				"${web_pool}": {
 					"class": "Pool",
@@ -91,6 +97,44 @@
 					"destinations": [{
 						"use": "telemetry_formatted"
 					}]
+				},
+				"telemetry_traffic_log_profile": {
+					"class": "Traffic_Log_Profile",
+					"requestSettings": {
+						"requestEnabled": true,
+						"requestProtocol": "mds-tcp",
+						"requestPool": {
+							"use": "telemetry"
+						},
+						"requestTemplate": "event_source=\"request_logging\",hostname=\"$BIGIP_HOSTNAME\",client_ip=\"$CLIENT_IP\",server_ip=\"$SERVER_IP\",http_method=\"$HTTP_METHOD\",http_uri=\"$HTTP_URI\",virtual_name=\"$VIRTUAL_NAME\",event_timestamp=\"$DATE_HTTP\""
+					}
+				},
+				"telemetry_http_analytics_profile": {
+					"class": "Analytics_Profile",
+					"collectGeo": true,
+					"collectMaxTpsAndThroughput": true,
+					"collectOsAndBrowser": true,
+					"collectIp": true,
+					"collectMethod": true,
+					"collectPageLoadTime": true,
+					"collectResponseCode": true,
+					"collectSubnet" : true,
+					"collectUrl": true,
+					"collectUserAgent": true,
+					"collectUserSession": true,
+					"publishIruleStatistics": true
+				},
+				"telemetry_tcp_analytics_profile": {
+					"class": "Analytics_TCP_Profile",
+					"collectCity": true,
+					"collectContinent": true,
+					"collectCountry": true,
+					"collectNexthop": true,
+					"collectPostCode": true,
+					"collectRegion": true,
+					"collectRemoteHostIp": true,
+					"collectRemoteHostSubnet" : true,
+					"collectedByServerSide": true
 				},
 				"webtls": {
 					"class": "TLS_Server",

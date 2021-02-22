@@ -23,26 +23,14 @@ output bigip_password {
 }
 
 output onboard_do {
-   value      = data.template_file.clustermemberDO2[0].rendered 
-  depends_on = [data.template_file.clustermemberDO2[0]]
+  value      = data.template_file.clustermemberDO1[0].rendered 
+  depends_on = [data.template_file.clustermemberDO1[0]]
 
-}
-
-output "external_nics" {
-  description = "List of BIG-IP external nics"
-  value   = concat(azurerm_network_interface.external_nic.*.id)
-}
-
-output "private_addresses" {
-  description = "List of BIG-IP private addresses"
-  value   = concat(azurerm_network_interface.external_nic.*.private_ip_addresses, azurerm_network_interface.external_public_nic.*.private_ip_addresses, azurerm_network_interface.internal_nic.*.private_ip_address)
 }
 
 output mgmt_nic {
   value = azurerm_network_interface.mgmt_nic.*.id
 }
 
-output vips {
-  value = element(azurerm_network_interface.external_public_nic.*.private_ip_addresses,1)
-}
+
 

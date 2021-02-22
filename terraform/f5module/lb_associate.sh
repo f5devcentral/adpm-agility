@@ -17,4 +17,4 @@ vipToConsul () {
 }
 
 associateIP
-vipToConsul
+#vipToConsul

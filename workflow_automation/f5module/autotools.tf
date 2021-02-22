@@ -13,6 +13,7 @@ data "template_file" "init_file" {
     DO_Document    = data.template_file.vm01_do_json.rendered
     AS3_Document   = data.template_file.as3_json.rendered
     TS_Document    = data.template_file.ts_json.rendered
+    app_name        = var.app_name
   }
 }
 
@@ -33,19 +34,19 @@ data "template_file" "as3_json" {
   depends_on = [null_resource.azure_cli_add]
   template = file("${path.module}/as3.json")
   vars = {
-    backendvm_ip    = var.backend01ext
     web_pool        = "myapp-${var.app}"
     app_name        = var.app_name
-    local_selfip    = data.consul_keys.vip.var.vip_address
   }
 }
 
-  data "template_file" "ts_json" {
-  template = file("${path.module}/ts.json")
+data "template_file" "ts_json" {
+  template   = file("${path.module}/ts.json")
 
   vars = {
-    region      = data.azurerm_resource_group.bigiprg.location
-    logStashIP  = var.logStashIP
-    logStashPort = var.logStashPort
+    #region          = data.azurerm_resource_group.bigiprg.location
+    #law_id          = var.law_id
+    #law_primarykey  = var.law_primarykey
+    logStashIP       = "10.2.1.125"
+
   }
 }

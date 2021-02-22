@@ -50,7 +50,6 @@ sudo chown --recursive consul:consul /etc/consul.d
 sudo chmod 640 /etc/consul.d/consul.hcl
 
 cat << EOF > /etc/consul.d/consul.hcl
-datacenter = "dc1"
 data_dir = "/opt/consul"
 ui = true
 EOF

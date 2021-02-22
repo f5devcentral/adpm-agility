@@ -1,4 +1,4 @@
-{
+ {
     "schemaVersion": "1.0.0",
     "class": "Device",
     "async": true,
@@ -7,12 +7,12 @@
         "class": "Tenant",
         "mySystem": {
                 "class": "System",
-                "hostname": "${hostname}"
+                "hostname": "bigip.azure.8f2e.com"
             },
     "myDns": {
         "class": "DNS",
         "nameServers": [
-                ${name_servers}
+                "168.63.129.16"
         ],
         "search": [
             "f5.com"
@@ -21,11 +21,11 @@
     "myNtp": {
         "class": "NTP",
         "servers": [
-                ${ntp_servers}
+                "0.pool.ntp.org","1.pool.ntp.org","2.pool.ntp.org"
         ],
         "timezone": "UTC"
     },
-    "${vlan-name}": {
+    "external-public-subnet": {
             "class": "VLAN",
     "tag": 4093,
     "mtu": 1500,
@@ -37,18 +37,19 @@
     ],
     "cmpHash": "dst-ip"
 },
-"${vlan-name}-self": {
+"external-public-subnet-self": {
     "class": "SelfIp",
-    "address": "${self-ip}/24",
-    "vlan": "${vlan-name}",
+    "address": "10.2.2.6/24",
+    "vlan": "external-public-subnet",
     "allowService": ["tcp:1028"],
     "trafficGroup": "traffic-group-local-only"
  },
    "default": {
       "class": "Route",
-      "gw": "${gateway}",
+      "gw": "10.2.2.1",
       "network": "default",
       "mtu": 1500
      }
   }
 }
+

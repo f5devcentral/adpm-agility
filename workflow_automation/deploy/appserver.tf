@@ -6,7 +6,7 @@ resource "azurerm_network_interface" "appnic" {
 
  ip_configuration {
    name                          = "testConfiguration"
-   subnet_id                     = data.azurerm_subnet.external-public.id
+   subnet_id                     = data.azurerm_subnet.mgmt.id
    private_ip_address_allocation = "dynamic"
  }
 }
@@ -80,7 +80,7 @@ resource "azurerm_virtual_machine" "app" {
  os_profile {
    computer_name  = "appserver"
    admin_username = "xuser"
-   admin_password = "F5labnet!"
+   admin_password = var.upassword
    custom_data    = filebase64("backend.sh")
  }
 

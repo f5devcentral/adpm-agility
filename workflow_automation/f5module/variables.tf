@@ -75,7 +75,7 @@ variable f5_image_name {
 }
 variable f5_version {
   type    = string
-  default = "14.1.206000"
+  default = "15.1.201000"
 }
 
 variable f5_product_name {
@@ -108,10 +108,10 @@ variable script_name {
 variable "dns_server" { default = "8.8.8.8" }
 variable "ntp_server" { default = "0.us.pool.ntp.org" }
 variable "timezone" { default = "UTC" }
-variable "ext_gw" { default = "10.2.2.1"}
+variable "ext_gw" { default = "10.2.1.1"}
 
 variable "app" {default = "app1" }
-variable "backend01ext" { default = "10.2.2.101" }
+variable "backend01ext" { default = "10.2.1.101" }
 
 variable "tls_cert" {default = ""}       
 variable "tls_key" {default = ""} 
@@ -127,7 +127,7 @@ variable doPackageUrl {
   description = "URL to download the BIG-IP Declarative Onboarding module"
   type        = string
   //default     = ""
-  default = "https://github.com/F5Networks/f5-declarative-onboarding/releases/download/v1.16.0/f5-declarative-onboarding-1.16.0-8.noarch.rpm"
+  default = "https://github.com/F5Networks/f5-declarative-onboarding/releases/download/v1.18.0/f5-declarative-onboarding-1.18.0-4.noarch.rpm"
 }
 ## Please check and update the latest AS3 URL from https://github.com/F5Networks/f5-appsvcs-extension/releases/latest 
 # always point to a specific version in order to avoid inadvertent configuration inconsistency
@@ -135,7 +135,7 @@ variable as3PackageUrl {
   description = "URL to download the BIG-IP Application Service Extension 3 (AS3) module"
   type        = string
   //default     = ""
-  default = "https://github.com/F5Networks/f5-appsvcs-extension/releases/download/v3.23.0/f5-appsvcs-3.23.0-5.noarch.rpm"
+  default = "https://github.com/F5Networks/f5-appsvcs-extension/releases/download/v3.25.0/f5-appsvcs-3.25.0-3.noarch.rpm"
 }
 
 ## Please check and update the latest TS URL from https://github.com/F5Networks/f5-telemetry-streaming/releases/latest 
@@ -144,7 +144,7 @@ variable tsPackageUrl {
   description = "URL to download the BIG-IP Telemetry Streaming module"
   type        = string
   //default     = ""
-  default = "https://github.com/F5Networks/f5-telemetry-streaming/releases/download/v1.15.0/f5-telemetry-1.15.0-4.noarch.rpm"
+  default = "https://github.com/F5Networks/f5-telemetry-streaming/releases/download/v1.17.0/f5-telemetry-1.17.0-4.noarch.rpm"
 }
 
 ## Please check and update the latest FAST URL from https://github.com/F5Networks/f5-appsvcs-templates/releases/latest 
@@ -201,6 +201,16 @@ variable azure_keyvault_name {
 }
 
 variable app_name {
+  type    = string
+  default = ""
+}
+
+variable law_id {
+  type    = string
+  default = ""
+}
+
+variable law_primarykey {
   type    = string
   default = ""
 }
