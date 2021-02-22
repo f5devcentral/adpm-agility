@@ -241,13 +241,13 @@ jobs:
         if: needs.setup.outputs.scaling_direction == 'out'
         run: echo "scaling out"
 
-      # - name: login to azure
-      #   uses: azure/login@v1
-      #   with:
-      #     creds: ${{ secrets.AZURE_CREDS }}
+      - name: login to azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDS }}
 
-      # - name: run azure command
-      #   run: az account list
+      - name: run azure command
+        run: az account list
 
       # - name: output github secret info
       #   id: secret_info
