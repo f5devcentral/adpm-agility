@@ -82,6 +82,7 @@ jobs:
         id: check_interval
         run: |
           echo ::set-output name=app_scaling_time_delta::$(expr ${{ steps.current_time_seconds.outputs.current_time_seconds }} - ${{ steps.seconds.outputs.app_modified_seconds }})
+          echo ::set-output name=bigip_scaling_time_delta::$(expr ${{ steps.current_time_seconds.outputs.current_time_seconds }} - ${{ steps.seconds.outputs.bigip_modified_seconds }})
 
       - name: show scaling deltas
         run: echo "App scaling delta in seconds is = ${{ steps.check_interval.outputs.app_scaling_time_delta }}"
