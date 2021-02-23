@@ -116,7 +116,7 @@ jobs:
           echo ::set-output name=bigip_max::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/common/scaling/bigip/max)
           echo ::set-output name=bigip_min_scaling_interval::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/common/scaling/bigip/min_scaling_interval_seconds)
           echo ::set-output name=app_min::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/common/scaling/apps/min)
-          echo ::set-output name=bigip_max::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/common/scaling/bigip/max)
+          echo ::set-output name=app_max::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/common/scaling/apps/max)
           echo ::set-output name=app_min_scaling_interval::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/common/scaling/apps/min_scaling_interval_seconds)
 
       - name: check time
