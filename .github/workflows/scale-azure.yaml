@@ -162,7 +162,7 @@ jobs:
       #     echo ::set-output name=can_scale::'true'
       #     echo "CAN SCALE IN or OUT!"
       
-      - name: use env
+      - name: test limits
         id: test
         env: 
           DIRECTION: "${{ github.event.client_payload.scaling_direction }}"
@@ -191,7 +191,7 @@ jobs:
               echo "DIRECTION IS DOWN"
               echo "::set-output name=app_count::$(expr ${{ steps.student_data.outputs.app_instance_count }} - 1)"
               echo ::set-output name=can_scale::'true'
-            elif [[ $DIRECTION == 'up' ]]  && (${{ steps.delta.outputs.app-scale-up }} < ${{ steps.query_scaling.outputs.app_max }}); then
+            elif [[ $DIRECTION == 'up' ]]  && [[ ${{ steps.delta.outputs.app-scale-up }} < ${{ steps.query_scaling.outputs.app_max }} ]]; then
               echo "::set-env name=direction::up"
               echo "::set-output name=direction::up"
               echo "DIRECTION IS UP"
