@@ -34,7 +34,12 @@ jobs:
         uses: actions/checkout@v2
   
       - name: output webhook payload
-        run: echo "The source of the webhook is = ${{ github.event.client_payload }}"
+        run: |
+          echo "The source of the webhook is = ${{ github.event.client_payload.webhook_source }}"
+          echo "The student id from the webhook is = ${{ github.event.client_payload.student_id}}"
+          echo "The scaling direction from webhook is = ${{ github.event.client_payload.scaling_direction }}"
+          echo "The scaling type from webhook is = ${{ github.event.client_payload.scaling_type }}"
+          echo "The app name from the webhook is = ${{ github.event.client_payload.app_name }}"
 
       # - name: enable actions command processing
       #   run: echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
@@ -44,11 +49,6 @@ jobs:
         run: |
           echo ::set-output name=student_id::${{ github.event.client_payload.student_id }}
           echo ::set-output name=app_name::${{ github.event.client_payload.app_name }}
-
-      - name: output student id
-        run: |
-          echo "This is the student id from payload = ${{ github.event.client_payload.student_id }}"
-          echo "This is the app name from payload = ${{ github.event.client_payload.app_name }}"
 
       - name: install consul client
         run: sudo sh scripts/consul.sh 
@@ -142,17 +142,17 @@ jobs:
       - name: calculate difference
         id: delta
         run: |
-          echo ::set-output name=bigip-scale-in::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - ${{ steps.query_scaling.outputs.bigip_min }})
-          echo ::set-output name=bigip-scale-out::$(expr ${{ steps.query_scaling.outputs.bigip_max }} - ${{ steps.student_data.outputs.bigip_instance_count }} + 1 )
-          echo ::set-output name=app-scale-in::$(expr ${{ steps.student_data.outputs.app_instance_count }} - ${{ steps.query_scaling.outputs.app_min }})
-          echo ::set-output name=app-scale-out::$(expr ${{ steps.query_scaling.outputs.app_max }} - ${{ steps.student_data.outputs.app_instance_count }} + 1 )
+          echo ::set-output name=bigip-scale-down::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - ${{ steps.query_scaling.outputs.bigip_min }})
+          echo ::set-output name=bigip-scale-up::$(expr ${{ steps.query_scaling.outputs.bigip_max }} - ${{ steps.student_data.outputs.bigip_instance_count }} + 1 )
+          echo ::set-output name=app-scale-down::$(expr ${{ steps.student_data.outputs.app_instance_count }} - ${{ steps.query_scaling.outputs.app_min }})
+          echo ::set-output name=app-scale-up::$(expr ${{ steps.query_scaling.outputs.app_max }} - ${{ steps.student_data.outputs.app_instance_count }} + 1 )
 
       - name: output deltas
         run: |
-          echo "this is the scale in value for BIGIP = ${{ steps.delta.outputs.bigip-scale-in }}"
-          echo "this is the scale out value for BIGIP = ${{ steps.delta.outputs.bigip-scale-out }}"
-          echo "this is the scale in value for app = ${{ steps.delta.outputs.app-scale-in }}"
-          echo "this is the scale out value for app = ${{ steps.delta.outputs.app-scale-out }}"
+          echo "this is the scale in value for BIGIP = ${{ steps.delta.outputs.bigip-scale-down }}"
+          echo "this is the scale out value for BIGIP = ${{ steps.delta.outputs.bigip-scale-up }}"
+          echo "this is the scale in value for app = ${{ steps.delta.outputs.app-scale-down }}"
+          echo "this is the scale out value for app = ${{ steps.delta.outputs.app-scale-up }}"
 
 
       # - name: check if can scale in
@@ -173,28 +173,28 @@ jobs:
           echo ::set-output name=app_count::${{ steps.student_data.outputs.app_instance_count }}
 
           if [[ "${{ github.event.client_payload.scaling_type }}" == "bigip" ]]; then
-            if [[ $DIRECTION == 'in' ]]  && [[ ${{ steps.delta.outputs.bigip-scale-in }} > 0 ]]; then
-              echo "::set-env name=direction::in"
+            if [[ $DIRECTION == 'down' ]]  && [[ ${{ steps.delta.outputs.bigip-scale-down }} > 0 ]]; then
+              echo "::set-env name=direction::down"
               echo "DIRECTION IS IN"
               echo "::set-output name=bigip_count::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1)"
               echo ::set-output name=can_scale::'true'
-            elif [[ $DIRECTION == 'out' ]]  && [[ ${{ steps.delta.outputs.bigip-scale-out }} > 0 ]]; then
-              echo "::set-env name=direction::out"
-              echo "::set-output name=direction::out"
-              echo "DIRECTION IS OUT"
+            elif [[ $DIRECTION == 'up' ]]  && [[ ${{ steps.delta.outputs.bigip-scale-up }} > 0 ]]; then
+              echo "::set-env name=direction::up"
+              echo "::set-output name=direction::up"
+              echo "DIRECTION IS UP"
               echo "::set-output name=new_count::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} + 1)"
               echo ::set-output name=can_scale::'true'
             fi
           elif [[ "${{ github.event.client_payload.scaling_type }}" == "app" ]]; then
-            if [[ $DIRECTION == 'in' ]]  && [[ ${{ steps.delta.outputs.app-scale-in }} > 0 ]]; then
-              echo "::set-env name=direction::in"
-              echo "DIRECTION IS IN"
+            if [[ $DIRECTION == 'down' ]]  && [[ ${{ steps.delta.outputs.app-scale-down }} > 0 ]]; then
+              echo "::set-env name=direction::down"
+              echo "DIRECTION IS DOWN"
               echo "::set-output name=app_count::$(expr ${{ steps.student_data.outputs.app_instance_count }} - 1)"
               echo ::set-output name=can_scale::'true'
-            elif [[ $DIRECTION == 'out' ]]  && [[ ${{ steps.delta.outputs.app-scale-out }} > 0 ]]; then
-              echo "::set-env name=direction::out"
-              echo "::set-output name=direction::out"
-              echo "DIRECTION IS OUT"
+            elif [[ $DIRECTION == 'up' ]]  && [[ ${{ steps.delta.outputs.app-scale-up }} > 0 ]]; then
+              echo "::set-env name=direction::up"
+              echo "::set-output name=direction::up"
+              echo "DIRECTION IS UP"
               echo "::set-output name=app_count::$(expr ${{ steps.student_data.outputs.app_instance_count }} + 1)"
               echo ::set-output name=can_scale::'true'
             fi
@@ -233,21 +233,21 @@ jobs:
           echo "this is the scaling_type = ${{ needs.setup.outputs.scaling_type }}"
           echo "this is the current count = ${{ needs.setup.outputs.current_count }}"
       
-      - name: scaling in 
-        if: needs.setup.outputs.scaling_direction == 'in'
-        run: echo "scaling in" 
+      - name: scaling down
+        if: needs.setup.outputs.scaling_direction == 'down'
+        run: echo "SCALING DOWN" 
 
-      - name: scaling out
-        if: needs.setup.outputs.scaling_direction == 'out'
-        run: echo "scaling out"
+      - name: scaling up
+        if: needs.setup.outputs.scaling_direction == 'up'
+        run: echo "SCALING UP"
 
-      - name: login to azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDS }}
+      # - name: login to azure
+      #   uses: azure/login@v1
+      #   with:
+      #     creds: ${{ secrets.AZURE_CREDS }}
 
-      - name: run azure command
-        run: az account list
+      # - name: run azure command
+      #   run: az account list
 
       # - name: output github secret info
       #   id: secret_info
