@@ -152,7 +152,7 @@ jobs:
         id: student_data
         run: |
           echo ::set-output name=bigip_current_count::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.outputs.student_id }}/scaling/bigip/current_count)
-          echo ::set-output name=app_current_count::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.outputs.student_id }}/scaling/apps/${{ github.event.client_payload.app_name }}/current_count)
+          echo ::set-output name=app_current_count::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id}}/scaling/apps/${{ github.event.client_payload.app_name }}/current_count)
 
       - name: output student data
         run: |
