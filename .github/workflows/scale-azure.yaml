@@ -145,7 +145,7 @@ jobs:
           echo ::set-output name=bigip-scale-down::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - ${{ steps.query_scaling.outputs.bigip_min }})
           echo ::set-output name=bigip-scale-up::$(expr ${{ steps.query_scaling.outputs.bigip_max }} - ${{ steps.student_data.outputs.bigip_instance_count }} + 1 )
           echo ::set-output name=app-scale-down::$(expr ${{ steps.student_data.outputs.app_instance_count }} - ${{ steps.query_scaling.outputs.app_min }})
-          echo ::set-output name=app-scale-up::$(expr ${{ steps.query_scaling.outputs.app_max }} - expr( ${{ steps.student_data.outputs.app_instance_count }} + 1 ) )
+          echo ::set-output name=app-scale-up::$(expr ${{ steps.student_data.outputs.app_instance_count }} + 1 )
 
       - name: output deltas
         run: |
@@ -191,7 +191,7 @@ jobs:
               echo "DIRECTION IS DOWN"
               echo "::set-output name=app_count::$(expr ${{ steps.student_data.outputs.app_instance_count }} - 1)"
               echo ::set-output name=can_scale::'true'
-            elif [[ $DIRECTION == 'up' ]]  && [[ ${{ steps.delta.outputs.app-scale-up }} > 0 ]]; then
+            elif [[ $DIRECTION == 'up' ]]  && [[ ${{ steps.delta.outputs.app-scale-up }} <= ${{ steps.query_scaling.outputs.app_max }} ]]; then
               echo "::set-env name=direction::up"
               echo "::set-output name=direction::up"
               echo "DIRECTION IS UP"
