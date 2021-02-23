@@ -4,7 +4,6 @@ const bodyParser = require('body-parser');
 const https = require('https')
 const http = require('http');
 const args = process.argv.slice(2) //Required to authenticate with Github action repo
-
 const repoPath  = '/repos/f5devcentral/adpm-agility/dispatches'  //Modify to match designated github action repo
  
  /*  
@@ -26,6 +25,7 @@ const repoPath  = '/repos/f5devcentral/adpm-agility/dispatches'  //Modify to mat
      bodyJson = JSON.parse(body);
      source = bodyJson.source;
      scaleAction = bodyJson.scaleAction;
+     //console.log(bodyJson);
 
      if (scaleAction == null){
         console.log("error with scaleaction");
@@ -33,23 +33,27 @@ const repoPath  = '/repos/f5devcentral/adpm-agility/dispatches'  //Modify to mat
       };
 
      if (source == "azureLogs"){
+      analytic = "azure"
       vals = bodyJson.SearchResults.tables[0].rows[0].toString();
-      v = vals.split(",");
-      console.log(vals);
+      var hostIndex = vals.search("bigip.azure")
+      //hostName = vals.substring(hostIndex, hostIndex + 20)
 
-      hostName = v[0];
-      poolName = v[1];
+      v = vals.split(",");
+      hostName = v[1];
+      poolName = v[0];
 
     } else if (source == 'elk') {
-      hostName = bodyJson.hostname
+      analytic = "elk"
+      hostName = bodyJson.hostName
       poolName = bodyJson.poolname
     }
     
      //Convert hostName and poolName to arrays and derive identifiers
      var n = hostName.split(".");
-     rgGrpRgn = n[2];
+     student_id = n[2];
 
      //Create scaling eventtype
+     var app_name = "";
      switch (scaleAction) {
        case "scaleOutBigip":
           what2Scale = 'bigip';
@@ -71,22 +75,17 @@ const repoPath  = '/repos/f5devcentral/adpm-agility/dispatches'  //Modify to mat
           break;
      } 
     
-    console.log(scaleAction);
-    console.log(hostName);
-    console.log(scaleName);
-    console.log(poolName);
-
-    student_id = (hostname.substring(12, 4));
+    console.log("The Student ID is - " + student_id + ". Webhook request to scale the " + what2Scale + " " + scaling_direction + ".  If relevant, the app name is '" + poolName + "'.")    
 
     //Construct Github Action webhook payload
     const data2 = JSON.stringify({
-        event_type: "scale-azure",
+        event_type: "scale-" + analytic,
         client_payload: {
             scaling_type: what2Scale,
-            app_name: app_name,
+            app_name: app_name[0],
             scaling_direction: scaling_direction,
             webhookSource: source,
-            student_id: studend_id
+            student_id: student_id
           }
         })
 
@@ -107,7 +106,8 @@ const repoPath  = '/repos/f5devcentral/adpm-agility/dispatches'  //Modify to mat
     Create https POST to github
     */
     const req2 = https.request(options, res2 => {
-       console.log(`statusCode: ${res2.statusCode}`)
+      console.log(`Post to Github returned status code of: ${res2.statusCode}`)
+      console.log("Processing operation complete.\n")
      
        res2.on('data', d => {
          process.stdout.write(d)
@@ -141,5 +141,6 @@ const repoPath  = '/repos/f5devcentral/adpm-agility/dispatches'  //Modify to mat
     }
 
   // Start listener
+  console.log("Starting alert processor...\n")
   }).listen(8000);
 

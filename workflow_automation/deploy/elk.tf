@@ -37,6 +37,12 @@ resource "azurerm_virtual_machine" "elkvm" {
   network_interface_ids = [azurerm_network_interface.elkvm-ext-nic.id]
   vm_size               = "Standard_DS3_v2"
 
+  # Uncomment this line to delete the OS disk automatically when deleting the VM
+  delete_os_disk_on_termination = true
+
+  # Uncomment this line to delete the data disks automatically when deleting the VM
+  delete_data_disks_on_termination = true
+  
   storage_os_disk {
     name              = "elkvmOsDisk"
     caching           = "ReadWrite"
