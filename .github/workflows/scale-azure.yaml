@@ -15,9 +15,10 @@ jobs:
       app_count: ${{ steps.test.outputs.app_count }}
       bigip_count: ${{ steps.test.outputs.bigip_count }}
       student_id: ${{ steps.client_payload_data.outputs.student_id }}
-      current_count: ${{ steps.student_data.outputs.bigip_instance_count }}
+      current_count: ${{ steps.student_data.outputs.bigip_current_count }}
       scaling_direction: ${{ github.event.client_payload.scaling_direction }}
       consul_server: ${{ steps.consul_params.outputs.consul_server }}
+      we_set_running: ${{ steps.check_running.outputs.we_set_running }}
     steps:
 
       - name: grab current time
@@ -33,7 +34,12 @@ jobs:
         uses: actions/checkout@v2
   
       - name: output webhook payload
-        run: echo "The source of the webhook is = ${{ github.event.client_payload }}"
+        run: |
+          echo "The source of the webhook is = ${{ github.event.client_payload.webhook_source }}"
+          echo "The student id from the webhook is = ${{ github.event.client_payload.student_id}}"
+          echo "The scaling direction from webhook is = ${{ github.event.client_payload.scaling_direction }}"
+          echo "The scaling type from webhook is = ${{ github.event.client_payload.scaling_type }}"
+          echo "The app name from the webhook is = ${{ github.event.client_payload.app_name }}"
 
       # - name: enable actions command processing
       #   run: echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
@@ -43,11 +49,6 @@ jobs:
         run: |
           echo ::set-output name=student_id::${{ github.event.client_payload.student_id }}
           echo ::set-output name=app_name::${{ github.event.client_payload.app_name }}
-
-      - name: output student id
-        run: |
-          echo "This is the student id from payload = ${{ github.event.client_payload.student_id }}"
-          echo "This is the app name from payload = ${{ github.event.client_payload.app_name }}"
 
       - name: install consul client
         run: sudo sh scripts/consul.sh 
@@ -130,28 +131,28 @@ jobs:
       - name: query student data
         id: student_data
         run: |
-          echo ::set-output name=bigip_instance_count::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.outputs.student_id }}/scaling/bigip/current_count)
-          echo ::set-output name=app_instance_count::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.outputs.student_id }}/scaling/apps/${{ github.event.client_payload.app_name }}/current_count)
+          echo ::set-output name=bigip_current_count::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.outputs.student_id }}/scaling/bigip/current_count)
+          echo ::set-output name=app_current_count::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ steps.client_payload_data.outputs.student_id }}/scaling/apps/${{ github.event.client_payload.app_name }}/current_count)
 
       - name: output student data
         run: |
-          echo "The current BIG-IP instance count for student ${{ steps.client_payload_data.outputs.student_id }} is ${{ steps.student_data.outputs.bigip_instance_count }}"
-          echo "The current app instance count for student ${{ steps.client_payload_data.outputs.student_id }} is ${{ steps.student_data.outputs.app_instance_count }}"
+          echo "The current BIG-IP instance count for student ${{ steps.client_payload_data.outputs.student_id }} is ${{ steps.student_data.outputs.bigip_current_count }}"
+          echo "The current app instance count for student ${{ steps.client_payload_data.outputs.student_id }} is ${{ steps.student_data.outputs.app_current_count }}"
 
       - name: calculate difference
         id: delta
         run: |
-          echo ::set-output name=bigip-scale-in::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - ${{ steps.query_scaling.outputs.bigip_min }})
-          echo ::set-output name=bigip-scale-out::$(expr ${{ steps.query_scaling.outputs.bigip_max }} - ${{ steps.student_data.outputs.bigip_instance_count }} + 1 )
-          echo ::set-output name=app-scale-in::$(expr ${{ steps.student_data.outputs.app_instance_count }} - ${{ steps.query_scaling.outputs.app_min }})
-          echo ::set-output name=app-scale-out::$(expr ${{ steps.query_scaling.outputs.app_max }} - ${{ steps.student_data.outputs.app_instance_count }} + 1 )
+          echo ::set-output name=wanted_bigip_scale_down_count::$(expr ${{ steps.student_data.outputs.bigip_current_count }} - ${{ steps.query_scaling.outputs.bigip_min }})
+          echo ::set-output name=wanted_bigip_scale_up_count::$(expr ${{ steps.query_scaling.outputs.bigip_max }} - ${{ steps.student_data.outputs.bigip_current_count }} + 1 )
+          echo ::set-output name=wanted_app_scale_down_count::$(expr ${{ steps.student_data.outputs.app_current_count }} - ${{ steps.query_scaling.outputs.app_min }})
+          echo ::set-output name=wanted_app_scale_up_count::$(expr ${{ steps.student_data.outputs.app_current_count }} + 1 )
 
       - name: output deltas
         run: |
-          echo "this is the scale in value for BIGIP = ${{ steps.delta.outputs.bigip-scale-in }}"
-          echo "this is the scale out value for BIGIP = ${{ steps.delta.outputs.bigip-scale-out }}"
-          echo "this is the scale in value for app = ${{ steps.delta.outputs.app-scale-in }}"
-          echo "this is the scale out value for app = ${{ steps.delta.outputs.app-scale-out }}"
+          echo "this is the scale in value for BIGIP = ${{ steps.delta.outputs.wanted_bigip_scale_down_count }}"
+          echo "this is the scale out value for BIGIP = ${{ steps.delta.outputs.wanted_bigip_scale_up_count }}"
+          echo "this is the scale in value for app = ${{ steps.delta.outputs.wanted_app_scale_down_count }}"
+          echo "this is the scale out value for app = ${{ steps.delta.outputs.wanted_app_scale_up_count }}"
 
 
       # - name: check if can scale in
@@ -161,40 +162,40 @@ jobs:
       #     echo ::set-output name=can_scale::'true'
       #     echo "CAN SCALE IN or OUT!"
       
-      - name: use env
+      - name: test limits
         id: test
         env: 
           DIRECTION: "${{ github.event.client_payload.scaling_direction }}"
         run: |
           echo $DIRECTION
           echo ::set-output name=can_scale::'false'
-          echo ::set-output name=bigip_count::${{ steps.student_data.outputs.bigip_instance_count }}
-          echo ::set-output name=app_count::${{ steps.student_data.outputs.app_instance_count }}
+          echo ::set-output name=bigip_count::${{ steps.student_data.outputs.bigip_current_count }}
+          echo ::set-output name=app_count::${{ steps.student_data.outputs.app_current_count }}
 
           if [[ "${{ github.event.client_payload.scaling_type }}" == "bigip" ]]; then
-            if [[ $DIRECTION == 'in' ]]  && [[ ${{ steps.delta.outputs.bigip-scale-in }} > 0 ]]; then
-              echo "::set-env name=direction::in"
-              echo "DIRECTION IS IN"
-              echo "::set-output name=bigip_count::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - 1)"
+            if [[ $DIRECTION == 'down' ]]  && [[ ${{ steps.delta.outputs.wanted_bigip_scale_down_count }} > 0 ]]; then
+              echo "::set-env name=direction::down"
+              echo "DIRECTION IS DOWN"
+              echo "::set-output name=bigip_count::${{ steps.student_data.outputs.bigip_current_count }}"
               echo ::set-output name=can_scale::'true'
-            elif [[ $DIRECTION == 'out' ]]  && [[ ${{ steps.delta.outputs.bigip-scale-out }} > 0 ]]; then
-              echo "::set-env name=direction::out"
-              echo "::set-output name=direction::out"
-              echo "DIRECTION IS OUT"
-              echo "::set-output name=new_count::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} + 1)"
+            elif [[ $DIRECTION == 'up' ]]  && [[ ${{ steps.delta.outputs.wanted_bigip_scale_up_count }} > 0 ]]; then
+              echo "::set-env name=direction::up"
+              echo "::set-output name=direction::up"
+              echo "DIRECTION IS UP"
+              echo "::set-output name=new_count::${{ steps.delta.outputs.wanted_bigip_scale_up_count }}"
               echo ::set-output name=can_scale::'true'
             fi
           elif [[ "${{ github.event.client_payload.scaling_type }}" == "app" ]]; then
-            if [[ $DIRECTION == 'in' ]]  && [[ ${{ steps.delta.outputs.app-scale-in }} > 0 ]]; then
-              echo "::set-env name=direction::in"
-              echo "DIRECTION IS IN"
-              echo "::set-output name=app_count::$(expr ${{ steps.student_data.outputs.app_instance_count }} - 1)"
+            if [[ $DIRECTION == 'down' ]]  && [[ ${{ steps.delta.outputs.wanted_app_scale_down_count }} -ge ${{ steps.query_scaling.outputs.app_min }} ]]; then
+              echo "::set-env name=direction::down"
+              echo "DIRECTION IS DOWN"
+              echo "::set-output name=app_count::${{ steps.delta.outputs.wanted_app_scale_down_count }}"
               echo ::set-output name=can_scale::'true'
-            elif [[ $DIRECTION == 'out' ]]  && [[ ${{ steps.delta.outputs.app-scale-out }} > 0 ]]; then
-              echo "::set-env name=direction::out"
-              echo "::set-output name=direction::out"
-              echo "DIRECTION IS OUT"
-              echo "::set-output name=app_count::$(expr ${{ steps.student_data.outputs.app_instance_count }} + 1)"
+            elif [[ $DIRECTION == 'up' ]]  && [[ ${{ steps.delta.outputs.wanted_app_scale_up_count }} -le ${{ steps.query_scaling.outputs.app_max }} ]]; then
+              echo "::set-env name=direction::up"
+              echo "::set-output name=direction::up"
+              echo "DIRECTION IS UP"
+              echo "::set-output name=app_count::${{ steps.delta.outputs.wanted_app_scale_up_count }}"
               echo ::set-output name=can_scale::'true'
             fi
           fi
@@ -232,21 +233,21 @@ jobs:
           echo "this is the scaling_type = ${{ needs.setup.outputs.scaling_type }}"
           echo "this is the current count = ${{ needs.setup.outputs.current_count }}"
       
-      - name: scaling in 
-        if: needs.setup.outputs.scaling_direction == 'in'
-        run: echo "scaling in" 
+      - name: scaling down
+        if: needs.setup.outputs.scaling_direction == 'down'
+        run: echo "SCALING DOWN" 
 
-      - name: scaling out
-        if: needs.setup.outputs.scaling_direction == 'out'
-        run: echo "scaling out"
+      - name: scaling up
+        if: needs.setup.outputs.scaling_direction == 'up'
+        run: echo "SCALING UP"
 
-      # - name: login to azure
-      #   uses: azure/login@v1
-      #   with:
-      #     creds: ${{ secrets.AZURE_CREDS }}
+      - name: login to azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDS }}
 
-      # - name: run azure command
-      #   run: az account list
+      - name: run azure command
+        run: az account list
 
       # - name: output github secret info
       #   id: secret_info
@@ -262,17 +263,36 @@ jobs:
 
       - name: output terraform version
         run: terraform version
+    
+      
+      - name: set azure creds environment variables
+        run: |
+          echo ::set-env name=ARM_CLIENT_ID::${{ secrets.AZURE_CLIENT_ID }}
+          echo ::set-env name=ARM_CLIENT_SECRET::${{ secrets.AZURE_CLIENT_SECRET }}
+          echo ::set-env name=ARM_SUBSCRIPTION_ID::${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          echo ::set-env name=ARM_TENANT_ID::${{ secrets.AZURE_TENANT_ID }}
 
-      - name: process template file using jinja2
-        uses: cuchi/jinja2-action@v1.2.0
-        with:
-          template: ./workflow_automation/deploy/main.tpl
-          output_file: ./workflow_automation/deploy/main.tf
-          variables: |
-            client_id=${{ secrets.AZURE_CLIENT_ID }}
-            subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}
-            tenant_id=${{ secrets.AZURE_TENANT_ID }}
-            client_secret=${{ secrets.AZURE_CLIENT_SECRET }}
+      # - name: process template file using jinja2
+      #   uses: cuchi/jinja2-action@v1.2.0
+      #   with:
+      #     template: ./workflow_automation/deploy/providers.tpl
+      #     output_file: ./workflow_automation/deploy/providers.tf
+      #     variables: |
+      #       client_id=${{ secrets.AZURE_CLIENT_ID }}
+      #       subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      #       tenant_id=${{ secrets.AZURE_TENANT_ID }}
+      #       client_secret=${{ secrets.AZURE_CLIENT_SECRET }}
+      
+      # - name: process template file using jinja2
+      #   uses: cuchi/jinja2-action@v1.2.0
+      #   with:
+      #     template: ./workflow_automation/f5module/providers.tpl
+      #     output_file: ./workflow_automation/f5module/providers.tf
+      #     variables: |
+      #       client_id=${{ secrets.AZURE_CLIENT_ID }}
+      #       subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      #       tenant_id=${{ secrets.AZURE_TENANT_ID }}
+      #       client_secret=${{ secrets.AZURE_CLIENT_SECRET }}
       
       - name: terraform init state_setup
         run: |
@@ -298,22 +318,24 @@ jobs:
       - name: terraform plan /deploy
         run: |
           cd ./workflow_automation/deploy
-          terraform plan -var 'bigip_count=${{ needs.setup.outputs.bigip_count }}'
+          terraform plan
        
       - name: terraform apply /deploy
         run: |
           cd ./workflow_automation/deploy
-          terraform apply --auto-approve -var 'bigip_count=${{ needs.setup.outputs.bigip_count }}'
+          terraform apply --auto-approve 
       
       - name: install consul client
         run: sudo sh scripts/consul.sh
 
-      - name: update time on k/v store
+      - name: update time & count on k/v store
         run: |
           if [[ "${{ github.event.client_payload.scaling_type }}" == "bigip" ]]; then
-            echo `date '+%Y-%m-%d %H:%M:%S'` | consul kv put -http-addr=${{ needs.setup.outputs.consul_server }} adpm/labs/agility/students/${{ needs.setup.outputs.student_id }}/scaling/bigip/last_modified_time -
+            echo `date '+%Y-%m-%d %H:%M:%S'` | consul kv put -http-addr=${{ needs.setup.outputs.consul_server }} adpm/labs/agility/students/${{ needs.setup.outputs.student_id }}/scaling/bigip/last_modified_timestamp -
+            consul kv put -http-addr=${{ needs.setup.outputs.consul_server }} adpm/labs/agility/students/${{ needs.setup.outputs.student_id }}/scaling/bigip/current_count ${{ needs.setup.outputs.bigip_count }}
           else
-            echo `date '+%Y-%m-%d %H:%M:%S'` | consul kv put -http-addr=${{ needs.setup.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/apps/${{ github.event.client_payload.app_name }}/last_modified_time -
+            echo `date '+%Y-%m-%d %H:%M:%S'` | consul kv put -http-addr=${{ needs.setup.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/apps/${{ github.event.client_payload.app_name }}/last_modified_timestamp -
+            consul kv put -http-addr=${{ needs.setup.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/apps/${{ github.event.client_payload.app_name }}/current_count ${{ needs.setup.outputs.app_count }}
           fi
 
   reset_run_flag:
@@ -333,11 +355,12 @@ jobs:
 
       - name: reset run flag
         run: |
-          if [[ needs.setup.outputs.we_set_running == 'true' ]]; then
+          if [[ ${{ needs.setup.outputs.we_set_running == 'true' }} ]]; then
             if [[ "${{ github.event.client_payload.scaling_type }}" == "bigip" ]]; then
              consul kv put -http-addr=${{ needs.setup.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/bigip/is_running false
             else
               consul kv put -http-addr=${{ needs.setup.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/apps/${{ github.event.client_payload.app_name }}/is_running false
+              echo "RESET RUNNING FLAG"
             fi
           fi
 
