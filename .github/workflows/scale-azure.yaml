@@ -191,7 +191,7 @@ jobs:
               echo "DIRECTION IS DOWN"
               echo "::set-output name=app_count::$(expr ${{ steps.student_data.outputs.app_instance_count }} - 1)"
               echo ::set-output name=can_scale::'true'
-            elif [[ $DIRECTION == 'up' ]]  && [[ ${{ steps.delta.outputs.app-scale-up }} <= 3 ]]; then
+            elif [[ $DIRECTION == 'up' ]]  && ${{ steps.delta.outputs.app-scale-up }} <= ${{ steps.query_scaling.outputs.app_max }}; then
               echo "::set-env name=direction::up"
               echo "::set-output name=direction::up"
               echo "DIRECTION IS UP"
