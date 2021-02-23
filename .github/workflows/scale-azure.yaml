@@ -127,7 +127,7 @@ jobs:
               echo ::set-output name=we_set_running::'true'           
               echo "Good to go for app!"
             else 
-              echo "Minimum app scaling time interval not met!"
+              echo "TIME TOO SHORT! It has been ${{ steps.check_interval.outputs.app_scaling_time_delta }} seconds since last scaling event which is less than the minimum interval of ${{ steps.query_scaling.outputs.app_min_scaling_interval }} seconds"
               exit 1
             fi
           elif [[ "${{ github.event.client_payload.scaling_type }}" == "bigip" ]]; then
@@ -136,7 +136,7 @@ jobs:
               echo ::set-output name=we_set_running::'true'           
               echo "Good to go for BIGIP!"
             else
-              echo "Minimum app scaling time interval not met!"
+              echo "TIME TOO SHORT! It has been ${{ steps.check_interval.outputs.bigip_scaling_time_delta }} seconds since last scaling event which is less than the minimum interval of ${{ steps.query_scaling.outputs.bigip_min_scaling_interval }} seconds"
               exit 1
             fi
           fi
