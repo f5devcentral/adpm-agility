@@ -175,27 +175,27 @@ jobs:
           if [[ "${{ github.event.client_payload.scaling_type }}" == "bigip" ]]; then
             if [[ $DIRECTION == 'down' ]]  && [[ ${{ steps.delta.outputs.wanted_bigip_scale_down_count }} > 0 ]]; then
               echo "::set-env name=direction::down"
-              echo "DIRECTION IS IN"
-              echo "::set-output name=bigip_count::$(expr ${{ steps.student_data.outputs.bigip_current_count }} - 1)"
+              echo "DIRECTION IS DOWN"
+              echo "::set-output name=bigip_count::${{ steps.student_data.outputs.bigip_current_count }}"
               echo ::set-output name=can_scale::'true'
             elif [[ $DIRECTION == 'up' ]]  && [[ ${{ steps.delta.outputs.wanted_bigip_scale_up_count }} > 0 ]]; then
               echo "::set-env name=direction::up"
               echo "::set-output name=direction::up"
               echo "DIRECTION IS UP"
-              echo "::set-output name=new_count::$(expr ${{ steps.student_data.outputs.bigip_current_count }} + 1)"
+              echo "::set-output name=new_count::${{ steps.delta.outputs.wanted_bigip_scale_up_count }}"
               echo ::set-output name=can_scale::'true'
             fi
           elif [[ "${{ github.event.client_payload.scaling_type }}" == "app" ]]; then
             if [[ $DIRECTION == 'down' ]]  && [[ ${{ steps.delta.outputs.wanted_app_scale_down_count }} -ge ${{ steps.query_scaling.outputs.app_min }} ]]; then
               echo "::set-env name=direction::down"
               echo "DIRECTION IS DOWN"
-              echo "::set-output name=app_count::$(expr ${{ steps.student_data.outputs.app_current_count }} - 1)"
+              echo "::set-output name=app_count::${{ steps.delta.outputs.wanted_app_scale_down_count }}"
               echo ::set-output name=can_scale::'true'
             elif [[ $DIRECTION == 'up' ]]  && [[ ${{ steps.delta.outputs.wanted_app_scale_up_count }} -le ${{ steps.query_scaling.outputs.app_max }} ]]; then
               echo "::set-env name=direction::up"
               echo "::set-output name=direction::up"
               echo "DIRECTION IS UP"
-              echo "::set-output name=app_count::$(expr ${{ steps.student_data.outputs.app_current_count }} + 1)"
+              echo "::set-output name=app_count::${{ steps.delta.outputs.wanted_app_scale_up_count }}"
               echo ::set-output name=can_scale::'true'
             fi
           fi
