@@ -328,12 +328,14 @@ jobs:
       - name: install consul client
         run: sudo sh scripts/consul.sh
 
-      - name: update time on k/v store
+      - name: update time & count on k/v store
         run: |
           if [[ "${{ github.event.client_payload.scaling_type }}" == "bigip" ]]; then
             echo `date '+%Y-%m-%d %H:%M:%S'` | consul kv put -http-addr=${{ needs.setup.outputs.consul_server }} adpm/labs/agility/students/${{ needs.setup.outputs.student_id }}/scaling/bigip/last_modified_timestamp -
+            consul kv put -http-addr=${{ needs.setup.outputs.consul_server }} adpm/labs/agility/students/${{ needs.setup.outputs.student_id }}/scaling/bigip/current_count ${{ needs.setup.outputs.bigip_count }}
           else
             echo `date '+%Y-%m-%d %H:%M:%S'` | consul kv put -http-addr=${{ needs.setup.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/apps/${{ github.event.client_payload.app_name }}/last_modified_timestamp -
+            consul kv put -http-addr=${{ needs.setup.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/apps/${{ github.event.client_payload.app_name }}/current_count ${{ needs.setup.outputs.app_count }}
           fi
 
   reset_run_flag:
