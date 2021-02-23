@@ -263,28 +263,36 @@ jobs:
 
       - name: output terraform version
         run: terraform version
-
-      - name: process template file using jinja2
-        uses: cuchi/jinja2-action@v1.2.0
-        with:
-          template: ./workflow_automation/deploy/providers.tpl
-          output_file: ./workflow_automation/deploy/providers.tf
-          variables: |
-            client_id=${{ secrets.AZURE_CLIENT_ID }}
-            subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}
-            tenant_id=${{ secrets.AZURE_TENANT_ID }}
-            client_secret=${{ secrets.AZURE_CLIENT_SECRET }}
+    
       
-      - name: process template file using jinja2
-        uses: cuchi/jinja2-action@v1.2.0
-        with:
-          template: ./workflow_automation/f5module/providers.tpl
-          output_file: ./workflow_automation/f5module/providers.tf
-          variables: |
-            client_id=${{ secrets.AZURE_CLIENT_ID }}
-            subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}
-            tenant_id=${{ secrets.AZURE_TENANT_ID }}
-            client_secret=${{ secrets.AZURE_CLIENT_SECRET }}
+      - name: set azure creds environment variables
+        run: |
+          echo ::set-env name=ARM_CLIENT_ID::${{ secrets.AZURE_CLIENT_ID }}
+          echo ::set-env name=ARM_CLIENT_SECRET::${{ secrets.AZURE_CLIENT_SECRET }}
+          echo ::set-env name=ARM_SUBSCRIPTION_ID::${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          echo ::set-env name=ARM_TENANT_ID::${{ secrets.AZURE_TENANT_ID }}
+
+      # - name: process template file using jinja2
+      #   uses: cuchi/jinja2-action@v1.2.0
+      #   with:
+      #     template: ./workflow_automation/deploy/providers.tpl
+      #     output_file: ./workflow_automation/deploy/providers.tf
+      #     variables: |
+      #       client_id=${{ secrets.AZURE_CLIENT_ID }}
+      #       subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      #       tenant_id=${{ secrets.AZURE_TENANT_ID }}
+      #       client_secret=${{ secrets.AZURE_CLIENT_SECRET }}
+      
+      # - name: process template file using jinja2
+      #   uses: cuchi/jinja2-action@v1.2.0
+      #   with:
+      #     template: ./workflow_automation/f5module/providers.tpl
+      #     output_file: ./workflow_automation/f5module/providers.tf
+      #     variables: |
+      #       client_id=${{ secrets.AZURE_CLIENT_ID }}
+      #       subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      #       tenant_id=${{ secrets.AZURE_TENANT_ID }}
+      #       client_secret=${{ secrets.AZURE_CLIENT_SECRET }}
       
       - name: terraform init state_setup
         run: |
