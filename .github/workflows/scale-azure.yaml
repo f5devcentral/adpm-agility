@@ -145,7 +145,7 @@ jobs:
           echo ::set-output name=bigip-scale-down::$(expr ${{ steps.student_data.outputs.bigip_instance_count }} - ${{ steps.query_scaling.outputs.bigip_min }})
           echo ::set-output name=bigip-scale-up::$(expr ${{ steps.query_scaling.outputs.bigip_max }} - ${{ steps.student_data.outputs.bigip_instance_count }} + 1 )
           echo ::set-output name=app-scale-down::$(expr ${{ steps.student_data.outputs.app_instance_count }} - ${{ steps.query_scaling.outputs.app_min }})
-          echo ::set-output name=app-scale-up::$(expr ${{ steps.query_scaling.outputs.app_max }} - ${{ steps.student_data.outputs.app_instance_count }} + 1 )
+          echo ::set-output name=app-scale-up::$(expr ${{ steps.query_scaling.outputs.app_max }} - (${{ steps.student_data.outputs.app_instance_count }} + 1) )
 
       - name: output deltas
         run: |
@@ -241,13 +241,13 @@ jobs:
         if: needs.setup.outputs.scaling_direction == 'up'
         run: echo "SCALING UP"
 
-      # - name: login to azure
-      #   uses: azure/login@v1
-      #   with:
-      #     creds: ${{ secrets.AZURE_CREDS }}
+      - name: login to azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDS }}
 
-      # - name: run azure command
-      #   run: az account list
+      - name: run azure command
+        run: az account list
 
       # - name: output github secret info
       #   id: secret_info
