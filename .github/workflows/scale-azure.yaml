@@ -81,10 +81,10 @@ jobs:
       - name: check interval
         id: check_interval
         run: |
-          echo ::set-output name=app_scaling_delta::$(expr ${{ steps.current_time_seconds.outputs.current_time_seconds }} - ${{ steps.seconds.outputs.app_modified_seconds }})
+          echo ::set-output name=app_scaling_time_delta::$(expr ${{ steps.current_time_seconds.outputs.current_time_seconds }} - ${{ steps.seconds.outputs.app_modified_seconds }})
 
       - name: show scaling deltas
-        run: echo "App scaling delta in seconds is = ${{ steps.check_interval.outputs.app_scaling_delta }}"
+        run: echo "App scaling delta in seconds is = ${{ steps.check_interval.outputs.app_scaling_time_delta }}"
 
       - name: check if another running already
         id: get_is_running
@@ -106,20 +106,39 @@ jobs:
           if [[ "${{ steps.get_is_running.outputs.is_running }}" == "true" ]]; then
             echo "WE ARE ABORTING BECAUSE ANOTHER RUNNING"
             exit 1
-          else
-            consul kv put -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/apps/${{ github.event.client_payload.app_name }}/is_running true
-            echo ::set-output name=we_set_running::'true'           
-            echo "Good to go!"
           fi
-
 
       - name: query bigip scaling min/max values
         id: query_scaling
         run: |
           echo ::set-output name=bigip_min::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/common/scaling/bigip/min)
           echo ::set-output name=bigip_max::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/common/scaling/bigip/max)
+          echo ::set-output name=bigip_min_scaling_interval::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/common/scaling/bigip/min_scaling_interval_seconds)
           echo ::set-output name=app_min::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/common/scaling/apps/min)
-          echo ::set-output name=app_max::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/common/scaling/apps/max)
+          echo ::set-output name=bigip_max::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/common/scaling/bigip/max)
+          echo ::set-output name=app_min_scaling_interval::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/common/scaling/apps/min_scaling_interval_seconds)
+
+      - name: check time
+        run: |
+          if [[ ${{ github.event.client_payload.scaling_type }} == "app" ]]; then
+            if [[ ${{ steps.check_interval.outputs.app_scaling_time_delta }} -ge ${{ steps.query_scaling.outputs.app_min_scaling_interval }} ]]; then
+              consul kv put -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/apps/${{ github.event.client_payload.app_name }}/is_running true
+              echo ::set-output name=we_set_running::'true'           
+              echo "Good to go for app!"
+            else 
+              echo "Minimum app scaling time interval not met!"
+              exit 1
+            fi
+          elif [[ ${{ github.event.client_payload.scaling_type }} == "bigip" ]]; then
+            if [[ ${{ steps.check_interval.outputs.bigip_scaling_time_delta }} -ge ${{ steps.query_scaling.outputs.bigip_min_scaling_interval }} ]]; then
+              consul kv put -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/bigip/${{ github.event.client_payload.app_name }}/is_running true
+              echo ::set-output name=we_set_running::'true'           
+              echo "Good to go for BIGIP!"
+            else
+              echo "Minimum app scaling time interval not met!"
+              exit 1
+            fi
+          fi
 
       - name: output min and max values
         run: |
