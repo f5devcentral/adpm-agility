@@ -1,8 +1,8 @@
-name: scale-azure-2
+name: scale-azure
 on:
   repository_dispatch:
     types:
-      - scale-azure-2
+      - scale-azure
 jobs:
   setup:
     name: setup
@@ -169,7 +169,7 @@ jobs:
 
       - name: check time
         run: |
-          if [[ ${{ steps.values.outputs.min_scaling_interval }} -gt ${{ steps.values.outputs.scaling_time_delta }} ]]; then
+          if [[ ${{ steps.values.outputs.scaling_time_delta }} -lt ${{ steps.values.outputs.min_scaling_interval }} ]]; then
             echo "TIME TOO SHORT! It has been ${{ steps.values.outputs.scaling_time_delta }} seconds since last scaling event which is less than the minimum interval of ${{ steps.values.outputs.min_scaling_interval }} seconds"
             exit 1
           fi
@@ -192,12 +192,12 @@ jobs:
         run: |
           echo $DIRECTION
           echo ::set-output name=can_scale::'false'
-            if [[ $DIRECTION == 'down' ]]  && [[ ${{ steps.delta.outputs.wanted_scale_down_count }} -ge ${{ steps.values.outputs.min_count }} ]]; then
+            if [[ $DIRECTION == 'down' ]]  && [[ ${{ steps.delta.outputs.wanted_app_scale_down_count }} -ge ${{ steps.values.outputs.min_count }} ]]; then
               echo "::set-env name=direction::down"
               echo "DIRECTION IS DOWN"
               echo "::set-output name=new_count::${{ steps.delta.outputs.wanted_app_scale_down_count }}"
               echo ::set-output name=can_scale::'true'
-            elif [[ $DIRECTION == 'up' ]]  && [[ ${{ steps.delta.outputs.wanted_scale_up_count }} -le ${{ steps.values.outputs.max_count }} ]]; then
+            elif [[ $DIRECTION == 'up' ]]  && [[ ${{ steps.delta.outputs.wanted_app_scale_up_count }} -le ${{ steps.values.outputs.max_count }} ]]; then
                echo "::set-env name=direction::up"
                echo "::set-output name=direction::up"
                echo "DIRECTION IS UP"
