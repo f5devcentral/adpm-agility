@@ -253,7 +253,7 @@ jobs:
         run: echo "SCALING DOWN" 
 
       - name: scaling up
-        if: needs.setup.outputs.scaling_direction == 'up'
+        if: needs.setup.outputs.scaling_direction == 'up' 
         run: echo "SCALING UP"
       
       - name: assign new count
