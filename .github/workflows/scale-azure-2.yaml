@@ -223,7 +223,7 @@ jobs:
       - name: can't scale
         if: steps.test.outputs.can_scale != 'true'
         run: |
-          if [[ "${{ github.event.client_payload.scaling_direction }}"" == "up" ]]; then
+          if [[ "${{ github.event.client_payload.scaling_direction }}" == "up" ]]; then
             "Can't scale up to desired capacity of ${{ steps.delta.outputs.wanted_scale_up_count }} because it exceeds the maximum number of instances of ${{ steps.values.outputs.max_count }}"
           else
             "Can't scale down to the desired capacity of ${{ steps.delta.outputs.wanted_scale_down_count }} because it is lower than the minimum number of instances of ${{ steps.values.outputs.min_count }}"
