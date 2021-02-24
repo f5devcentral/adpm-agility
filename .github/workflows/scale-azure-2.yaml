@@ -105,6 +105,9 @@ jobs:
           echo ::set-output name=bigip_modified_seconds::$(date --date="${{ steps.last_modified.outputs.bigip_last_modified_time }}" +%s)
           echo ::set-output name=app_modified_seconds::$(date --date="${{ steps.last_modified.outputs.app_last_modified_time }}" +%s)
 
+          echo "App current count is ${{ steps.current.outputs.app_current_count }}"
+          echo "BIGIP current count is ${{ steps.current.outputs.bigip_current_count }}"
+
       - name: set values
         id: values
         run: |
