@@ -177,6 +177,9 @@ jobs:
       - name: calculate difference
         id: delta
         run: |
+          echo "This is the current count ${{ steps.values.outputs.current_count }}"
+          echo "This is the max count ${{ steps.values.outputs.max_count }}"
+          echo "This is the max count ${{ steps.values.outputs.min_count }}"
           echo ::set-output name=wanted_scale_down_count::$(expr ${{ steps.values.outputs.current_count }} - ${{ steps.values.outputs.min_count }})
           echo ::set-output name=wanted_scale_up_count::$(expr ${{ steps.values.outputs.max_count }} - ${{ steps.values.outputs.current_count }} + 1 )
 
