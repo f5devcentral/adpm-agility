@@ -237,7 +237,7 @@ jobs:
           echo "This is the app_count variable from build step = ${{ needs.setup.outputs.app_current_count }}"
           echo "This is the bigip_count variable from build step = ${{ needs.setup.outputs.bigip_current_count }}"
           echo "this is the student number = ${{ needs.setup.outputs.student_id }}"
-          echo "this is the scaling_type = ${{ needs.setup.outputs.scaling_type }}"
+          echo "this is the scaling_type = ${{ github.event.client_payload.scaling_type }}"
           echo "this is the new count = ${{ needs.setup.outputs.new_count }}"
       
       - name: scaling down
@@ -251,7 +251,7 @@ jobs:
       - name: assign new count
         id: count
         run: |
-          if [[ ${{ needs.setup.outputs.scaling_type }} == "app"; then
+          if [[ ${{ github.event.client_payload.scaling_type }} == "app"; then
             echo ::set-output name=app_count::${{ needs.setup.outputs.new_count }}
             echo ::set-output name=bigip_count::${{ needs.setup.outputs.bigip_current_count }}
           else 
