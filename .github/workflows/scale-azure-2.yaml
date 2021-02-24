@@ -1,8 +1,8 @@
-name: scale-azure-2
+name: scale-azure
 on:
   repository_dispatch:
     types:
-      - scale-azure-2
+      - scale-azure
 jobs:
   setup:
     name: setup
