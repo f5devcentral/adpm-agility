@@ -262,7 +262,7 @@ jobs:
             echo ::set-output name=app_count::${{ needs.setup.outputs.app_current_count }}
           fi
       
-      - name: output counts
+      - name: output counts 
         run: |
           echo "THIS IS THE APP COUNT ${{ steps.count.outputs.app_count }}"
           echo "THIS IS THE BIGIP COUNT ${{ steps.count.outputs.bigip_count }}"
