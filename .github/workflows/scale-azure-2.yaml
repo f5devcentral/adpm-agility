@@ -21,6 +21,11 @@ jobs:
       app_current_count: ${{ steps.current.outputs.app_current_count }}
     steps:
 
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+        run: echo "$GITHUB_CONTEXT"
+        
       - name: grab current time
         id: current_time_seconds
         run: echo ::set-output name=current_time_seconds::$(date +%s)
