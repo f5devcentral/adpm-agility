@@ -78,7 +78,7 @@ resource "azurerm_virtual_machine" "app" {
  }
 
  os_profile {
-   computer_name  = "appserver"
+   computer_name  = format("appserver-%s", count.index)
    admin_username = "xuser"
    admin_password = var.upassword
    custom_data    = filebase64("backend.sh")

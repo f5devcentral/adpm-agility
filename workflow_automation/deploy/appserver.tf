@@ -1,5 +1,5 @@
 resource "azurerm_network_interface" "appnic" {
- count               = local.app_count
+ count               = var.app_count
  name                = "app_nic_${count.index}"
  location            = azurerm_resource_group.rg.location
  resource_group_name = azurerm_resource_group.rg.name
@@ -12,7 +12,7 @@ resource "azurerm_network_interface" "appnic" {
 }
 
 resource "azurerm_managed_disk" "appdisk" {
- count                = local.app_count
+ count                = var.app_count
  name                 = "datadisk_existing_${count.index}"
  location             = azurerm_resource_group.rg.location
  resource_group_name  = azurerm_resource_group.rg.name
@@ -31,7 +31,7 @@ resource "azurerm_availability_set" "avset" {
 }
 
 resource "azurerm_virtual_machine" "app" {
- count                 = local.app_count
+ count                 = var.app_count
  name                  = "app_vm_${count.index}"
  location              = azurerm_resource_group.rg.location
  availability_set_id   = azurerm_availability_set.avset.id
@@ -78,7 +78,7 @@ resource "azurerm_virtual_machine" "app" {
  }
 
  os_profile {
-   computer_name  = "appserver"
+   computer_name  = format("appserver-%s", count.index)
    admin_username = "xuser"
    admin_password = var.upassword
    custom_data    = filebase64("backend.sh")

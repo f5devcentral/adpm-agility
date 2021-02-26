@@ -29,4 +29,8 @@ resource "consul_keys" "app" {
     path  = format("adpm/labs/agility/students/%s/scaling/apps/%s/is_running", local.student_id, var.app_name)
     value = "false"
   }  
+  key {
+    path  = format("adpm/labs/agility/students/%s/consul_vip", local.student_id)
+    value = "http://${azurerm_public_ip.mgmt_public_ip.ip_address}:8500"
+  }  
 }

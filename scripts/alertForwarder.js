@@ -25,7 +25,7 @@ const repoPath  = '/repos/f5devcentral/adpm-agility/dispatches'  //Modify to mat
      bodyJson = JSON.parse(body);
      source = bodyJson.source;
      scaleAction = bodyJson.scaleAction;
-     //console.log(bodyJson);
+     console.log(bodyJson);
 
      if (scaleAction == null){
         console.log("error with scaleaction");
@@ -36,16 +36,15 @@ const repoPath  = '/repos/f5devcentral/adpm-agility/dispatches'  //Modify to mat
       analytic = "azure"
       vals = bodyJson.SearchResults.tables[0].rows[0].toString();
       var hostIndex = vals.search("bigip.azure")
-      //hostName = vals.substring(hostIndex, hostIndex + 20)
+      hostName = vals.substring(hostIndex, hostIndex + 20)
 
-      v = vals.split(",");
-      hostName = v[1];
-      poolName = v[0];
 
     } else if (source == 'elk') {
       analytic = "elk"
-      hostName = bodyJson.hostName
-      poolName = bodyJson.poolname
+      message = bodyJson.message
+      var hostIndex = message.search("bigip.azure")
+      hostName = message.substring(hostIndex, hostIndex + 20)
+      poolName = ""
     }
     
      //Convert hostName and poolName to arrays and derive identifiers
@@ -53,38 +52,42 @@ const repoPath  = '/repos/f5devcentral/adpm-agility/dispatches'  //Modify to mat
      student_id = n[2];
 
      //Create scaling eventtype
-     var app_name = "";
+     var app_name = "app1";
      switch (scaleAction) {
        case "scaleOutBigip":
           what2Scale = 'bigip';
           scaling_direction = 'up'
+          app_name = app_name
           break;
       case "scaleInBigip":
           what2Scale = 'bigip';
           scaling_direction = 'down'
+          app_name = app_name
           break;
       case "scaleOutWorkload":
           what2Scale = 'app';
           scaling_direction = 'up'
-          app_name = poolName.split("/");
+          app_name = app_name
           break;
       case "scaleInWorkload":
         what2Scale = 'app';
         scaling_direction = 'down'
-        app_name = poolName.split("/");
+        app_name = app_name
           break;
      } 
     
-    console.log("The Student ID is - " + student_id + ". Webhook request to scale the " + what2Scale + " " + scaling_direction + ".  If relevant, the app name is '" + poolName + "'.")    
+    console.log("The Student ID is " + student_id + ". Webhook request to scale the " + what2Scale + " " + scaling_direction + ".  If relevant, the app name is '" + app_name + "'.")    
 
     //Construct Github Action webhook payload
     const data2 = JSON.stringify({
-        event_type: "scale-" + analytic,
+        event_type: "scale-azure", //+ analytic,
         client_payload: {
             scaling_type: what2Scale,
-            app_name: app_name[0],
+            app_name: app_name,
             scaling_direction: scaling_direction,
             webhookSource: source,
+
+
             student_id: student_id
           }
         })
