@@ -66,7 +66,7 @@ output {
   elasticsearch { 
     hosts => ["https://127.0.0.1:9200"]
     user => "elastic"
-    password => "F5testnet"
+    password => "F5Student!"
     codec => json 
     index => "f5-%{+YYYY.MM.dd.hh.mm}"
     ssl => true
@@ -127,40 +127,40 @@ expect -exact "y\r
 \r
 \r
 Enter password for \[elastic\]: "
-send -- "F5testnet\r"
+send -- "F5Student!\r"
 expect -exact "\r
 Reenter password for \[elastic\]: "
-send -- "F5testnet\r"
+send -- "F5Student!\r"
 expect -exact "\r
 Enter password for \[apm_system\]: "
-send -- "F5testnet\r"
+send -- "F5Student!\r"
 expect -exact "\r
 Reenter password for \[apm_system\]: "
-send -- "F5testnet\r"
+send -- "F5Student!\r"
 expect -exact "\r
 Enter password for \[kibana_system\]: "
-send -- "F5testnet\r"
+send -- "F5Student!\r"
 expect -exact "\r
 Reenter password for \[kibana_system\]: "
-send -- "F5testnet\r"
+send -- "F5Student!\r"
 expect -exact "\r
 Enter password for \[logstash_system\]: "
-send -- "F5testnet\r"
+send -- "F5Student!\r"
 expect -exact "\r
 Reenter password for \[logstash_system\]: "
-send -- "F5testnet\r"
+send -- "F5Student!\r"
 expect -exact "\r
 Enter password for \[beats_system\]: "
-send -- "F5testnet\r"
+send -- "F5Student!\r"
 expect -exact "\r
 Reenter password for \[beats_system\]: "
-send -- "F5testnet\r"
+send -- "F5Student!\r"
 expect -exact "\r
 Enter password for \[remote_monitoring_user\]: "
-send -- "F5testnet\r"
+send -- "F5Student!\r"
 expect -exact "\r
 Reenter password for \[remote_monitoring_user\]: "
-send -- "F5testnet\r"
+send -- "F5Student!\r"
 expect eof
 EOF
 sudo chmod +x ./pass
@@ -203,7 +203,7 @@ Please enter the desired output file \[elastic-stack-ca.p12\]: "
 send -- "\r"
 expect -exact "\r
 Enter password for elastic-stack-ca.p12 : "
-send -- "F5testnet\r"
+send -- "F5Student!\r"
 expect eof
 EOF
 sudo chmod +x ./ca
@@ -269,13 +269,13 @@ If you specify any of the following options:\r
 then the output will be be a zip file containing individual certificate/key files\r
 \r
 Enter password for CA (elastic-stack-ca.p12) : "
-send -- "F5testnet\r"
+send -- "F5Student!\r"
 expect -exact "\r
 Please enter the desired output file \[elastic-certificates.p12\]: "
 send -- "\r"
 expect -exact "\r
 Enter password for elastic-certificates.p12 : "
-send -- "F5testnet\r"
+send -- "F5Student!\r"
 expect eof
 EOF
 sudo chmod +x ./cert
@@ -520,7 +520,7 @@ EOF
 sudo cat << EOF > kibana.yml
   # ======================== Kibana Configuration =========================
   elasticsearch.username: kibana_system
-  elasticsearch.password: F5testnet
+  elasticsearch.password: F5Student!
   elasticsearch.ssl.certificateAuthorities: ["/etc/kibana/elasticsearch-ca.pem"]
   elasticsearch.hosts: ["https://127.0.0.1:9200"]
   xpack.encryptedSavedObjects.encryptionKey: awsedrf545fktghwe324dftygh98ujyhr
