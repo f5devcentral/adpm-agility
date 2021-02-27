@@ -282,7 +282,7 @@ jobs:
       - name: Dump steps context
         env:
           STEPS_CONTEXT: ${{ toJSON(steps) }}
-        run: echo "$STEPS_CONTEXT"
+        run: echo "$STEPS_CONTEXT" | consul kv put -http-addr=${{ steps.current.outputs.student_consul_server}} workflows/runs/$GITHUB_RUN_NUMBER/jobs/setup -
         
 
   scale:
