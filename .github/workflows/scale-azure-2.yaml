@@ -54,7 +54,7 @@ jobs:
         run: echo ::set-output name=gh_context::$(echo "${{env.GITHUB_CONTEXT}}" )
 
       - name: output run id
-        run: echo "this is the run id $GITHUB_RUN_ID"
+        run: echo "this is the run number $GITHUB_RUN_NUMBER"
       
       # - name: output rendered context
       #   run: echo ${{ steps.json.outputs.gh_context }} | jq '.'
@@ -64,7 +64,7 @@ jobs:
       #   run: echo ::set-output name=wf_run_number::$(cat "${{ toJSON(github) }}" | jq '.run_number')
 
       - name: output workflow run number
-        run: echo "This is the workflow run number ${{ steps.workflow.outputs.wf_run_number }}"
+        run: echo "This is the workflow run number $GITHUB_RUN_NUMBER"
 
       - name: grab current time
         id: current_time_seconds
