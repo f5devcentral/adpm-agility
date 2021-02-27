@@ -422,7 +422,7 @@ jobs:
 
       - name: store github data in student consul
         run: |
-          consul kv put -http-addr=${{ needs.setup.outputs._student_consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/workflows/
+          consul kv put -http-addr=${{ needs.setup.outputs.student_consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/workflows/
 
 
       - name: update time & count on k/v store
@@ -440,7 +440,7 @@ jobs:
           STEPS_CONTEXT: ${{ toJSON(steps) }}
         run: |
           echo "THIS IS THE STEPS CONTEXT $STEPS_CONTEXT"
-          echo "$STEPS_CONTEXT" | consul kv put -http-addr=${{ needs.setup.outputs.student_consul_server}} workflows/runs/$GITHUB_RUN_NUMBER/jobs/reset_is_running -
+          echo "$STEPS_CONTEXT" | consul kv put -http-addr=${{ needs.setup.outputs.student_consul_server }} workflows/runs/$GITHUB_RUN_NUMBER/jobs/reset_is_running -
 
   reset_run_flag:
     if: always()
