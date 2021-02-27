@@ -54,7 +54,7 @@ jobs:
         run: echo ::set-output name=gh_context::$(echo "${{ toJSON(github) }}" )
 
       - name: output run id
-        run: echo "THIS IS THE CONTEXT ${{ steps.json.outputs.gh_context }}""
+        run: echo "THIS IS THE CONTEXT ${{ steps.json.outputs.gh_context }}"
       
       # - name: output rendered context
       #   run: echo ${{ steps.json.outputs.gh_context }} | jq '.'
