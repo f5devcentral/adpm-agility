@@ -54,7 +54,7 @@ jobs:
         run: echo ::set-output name=gh_context::$(echo "${{env.GITHUB_CONTEXT}}" )
       
       - name: output rendered context
-        run: echo "This is github context ${{ steps.json.outputs.gh_context }}" | jq '.run_number'
+        run: echo "${{ steps.json.outputs.gh_context }}" | jq '.run_number'
 
       # - name: get workflow run number
       #   id: workflow
