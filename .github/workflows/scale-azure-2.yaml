@@ -143,7 +143,9 @@ jobs:
           echo ::set-output name=student_consul_server::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id}}/consul_vip)
 
       - name: push data to student consul server
-        run: echo "${{ toJSON(github) }}" | consul kv put -http-addr=${{ steps.current.outputs.student_consul_server }} workflows/runs/$GITHUB_RUN_NUMBER -
+        env:
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+        run: echo "$GITHUB_CONTEXT" | consul kv put -http-addr=${{ steps.current.outputs.student_consul_server }} workflows/runs/$GITHUB_RUN_NUMBER -
 
       - name: output last modified times
         id: seconds
