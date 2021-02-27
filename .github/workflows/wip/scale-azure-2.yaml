@@ -19,7 +19,6 @@ jobs:
       we_set_running: ${{ steps.check_running.outputs.we_set_running }}
       bigip_current_count: ${{ steps.current.outputs.bigip_current_count }}
       app_current_count: ${{ steps.current.outputs.app_current_count }}
-      student_consul_server: ${{ steps.current.outputs.student_consul_server }}
     steps:
 
       - name: Dump GitHub context
@@ -123,7 +122,6 @@ jobs:
           echo ::set-output name=app_current_count::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id}}/scaling/apps/${{ github.event.client_payload.app_name }}/current_count)
 
           echo ::set-output name=bigip_current_count::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id}}/scaling/bigip/current_count)
-          echo ::set-output name=student_consul_server::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id}}/consul_vip)
       
       - name: output last modified times
         id: seconds
@@ -384,21 +382,9 @@ jobs:
         run: |
           cd ./workflow_automation/deploy
           terraform apply --auto-approve 
-
-      - name: get workflow run number
-        id: workflow
-        run: echo ::set-output name=wf_run_number::$(cat ${{ env.GITHUB_CONTEXT }} | jq '.run_number')
-
-      - name: output workflow run number
-        run: echo "This is the workflow run number ${{ steps.workflow.outputs.wf_run_number }}"
       
       - name: install consul client
         run: sudo sh scripts/consul.sh
-
-      # - name: store github data in student consul
-      #   run: |
-      #     consul kv put -http-addr=${{ needs.setup.outputs._student_consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/workflows/
-
 
       - name: update time & count on k/v store
         run: |
