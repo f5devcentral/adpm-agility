@@ -443,6 +443,11 @@ jobs:
         run: |
           echo ::set-env name=CONSUL_HTTP_TOKEN::${{ secrets.CONSUL_HTTP_TOKEN }}
           sudo sh scripts/consul.sh
+      
+      - name: Dump job context
+        env:
+          JOB_CONTEXT: ${{ toJSON(job) }}
+        run: echo "$JOB_CONTEXT"
 
       - name: reset run flag
         run: |
