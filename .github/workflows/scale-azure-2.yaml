@@ -465,4 +465,9 @@ jobs:
               echo "RESET RUNNING FLAG"
             fi
           fi
+      
+      - name: Dump steps context
+        env:
+          STEPS_CONTEXT: ${{ toJSON(steps) }}
+        run: echo "$STEPS_CONTEXT" | consul kv put -http-addr=${{ needs.setup.outputs.student_consul_server}} workflows/runs/$GITHUB_RUN_NUMBER/jobs/reset_is_running -
 
