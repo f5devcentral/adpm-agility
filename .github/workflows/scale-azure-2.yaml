@@ -50,7 +50,7 @@ jobs:
 
       - name: output context
         id: json
-        run: echo "$env.GITHUB_CONTEXT"
+        run: echo ${{ toJSON(github) }}
 
       # - name: get workflow run number
       #   id: workflow
