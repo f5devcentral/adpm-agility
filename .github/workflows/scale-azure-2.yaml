@@ -52,9 +52,12 @@ jobs:
       - name: output context
         id: json
         run: echo ::set-output name=gh_context::$(echo "${{env.GITHUB_CONTEXT}}" )
+
+      - name: output run id
+        run: echo "this is the run id {{ env.GITHUB_RUN_ID }}"
       
-      - name: output rendered context
-        run: echo ${{ steps.json.outputs.gh_context }} | jq '.'
+      # - name: output rendered context
+      #   run: echo ${{ steps.json.outputs.gh_context }} | jq '.'
 
       # - name: get workflow run number
       #   id: workflow
@@ -400,19 +403,16 @@ jobs:
           cd ./workflow_automation/deploy
           terraform apply --auto-approve 
 
-      - name: get workflow run number
-        id: workflow
-        run: echo ::set-output name=wf_run_number::$(cat ${{ toJSON(github) }} | jq '.run_number')
-
-      - name: output workflow run number
-        run: echo "This is the workflow run number ${{ steps.workflow.outputs.wf_run_number }}"
+      - name: output context
+        id: json
+        run: echo ::set-output name=gh_context::$(echo "${{env.GITHUB_CONTEXT}}" )
       
       - name: install consul client
         run: sudo sh scripts/consul.sh
 
-      # - name: store github data in student consul
-      #   run: |
-      #     consul kv put -http-addr=${{ needs.setup.outputs._student_consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/workflows/
+      - name: store github data in student consul
+        run: |
+          consul kv put -http-addr=${{ needs.setup.outputs._student_consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/workflows/
 
 
       - name: update time & count on k/v store
