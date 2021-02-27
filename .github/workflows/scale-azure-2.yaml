@@ -48,6 +48,13 @@ jobs:
           MATRIX_CONTEXT: ${{ toJSON(matrix) }}
         run: echo "$MATRIX_CONTEXT"
 
+      - name: get workflow run number
+        id: workflow
+        run: echo ::set-output name=wf_run_number::$(cat ${{ toJSON(github) }} | jq '.run_number')
+
+      - name: output workflow run number
+        run: echo "This is the workflow run number ${{ steps.workflow.outputs.wf_run_number }}"
+
       - name: grab current time
         id: current_time_seconds
         run: echo ::set-output name=current_time_seconds::$(date +%s)
@@ -258,7 +265,7 @@ jobs:
           fi
 
   scale:
-    if: needs.setup.outputs.can_scale == 'true'
+    if: needs.setup.outputs.can_scale == 'true' && 0 == 1
     runs-on: ubuntu-latest
     env:
       ACTIONS_ALLOW_UNSECURE_COMMANDS: true
