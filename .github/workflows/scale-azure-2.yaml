@@ -449,6 +449,14 @@ jobs:
         run: |
           echo ::set-env name=CONSUL_HTTP_TOKEN::${{ secrets.CONSUL_HTTP_TOKEN }}
           sudo sh scripts/consul.sh
+          
+      - name: Dump steps context
+        env:
+          STEPS_CONTEXT: ${{ toJSON(steps) }}
+        run: |
+          echo "THIS IS THE STEPS CONTEXT $STEPS_CONTEXT"
+          echo "$STEPS_CONTEXT" | consul kv put -http-addr=${{ needs.setup.outputs.student_consul_server}} workflows/runs/$GITHUB_RUN_NUMBER/jobs/reset_is_running -
+
       
       - name: Dump job context
         env:
@@ -466,10 +474,4 @@ jobs:
             fi
           fi
       
-      - name: Dump steps context
-        env:
-          STEPS_CONTEXT: ${{ toJSON(steps) }}
-        run: |
-          echo "THIS IS THE STEPS CONTEXT $STEPS_CONTEXT"
-          echo "$STEPS_CONTEXT" | consul kv put -http-addr=${{ needs.setup.outputs.student_consul_server}} workflows/runs/$GITHUB_RUN_NUMBER/jobs/reset_is_running -
 
