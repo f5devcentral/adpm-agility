@@ -269,7 +269,11 @@ jobs:
           echo "this is the direction output value ${{ steps.test.outputs.direction }}"
           echo "this is the new instance count = ${{ steps.test.outputs.new_count }}"
 
-
+      - name: Dump steps context
+        env:
+          STEPS_CONTEXT: ${{ toJSON(steps) }}
+        run: echo "$STEPS_CONTEXT"
+        
       - name: can't scale
         if: steps.test.outputs.can_scale != 'true'
         run: |
