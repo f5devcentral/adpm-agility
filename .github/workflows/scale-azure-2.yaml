@@ -50,7 +50,7 @@ jobs:
 
       - name: get workflow run number
         id: workflow
-        run: echo ::set-output name=wf_run_number::$(cat ${{ toJSON(github) }} | jq '.')
+        run: echo ::set-output name=wf_run_number::$(cat "${{ toJSON(github) }}" | jq '.')
 
       - name: output workflow run number
         run: echo "This is the workflow run number ${{ steps.workflow.outputs.wf_run_number }}"
