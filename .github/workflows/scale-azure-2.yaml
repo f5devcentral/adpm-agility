@@ -54,7 +54,7 @@ jobs:
         run: echo ::set-output name=gh_context::$(echo "${{env.GITHUB_CONTEXT}}" )
 
       - name: output run id
-        run: echo "this is the run id ${{ env.GITHUB_RUN_ID }}"
+        run: echo "this is the run id $GITHUB_RUN_ID"
       
       # - name: output rendered context
       #   run: echo ${{ steps.json.outputs.gh_context }} | jq '.'
