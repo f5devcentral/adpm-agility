@@ -48,9 +48,13 @@ jobs:
           MATRIX_CONTEXT: ${{ toJSON(matrix) }}
         run: echo "$MATRIX_CONTEXT"
 
-      - name: get workflow run number
-        id: workflow
-        run: echo ::set-output name=wf_run_number::$(cat "${{ toJSON(github) }}" | jq '.run_number')
+      - name: output context
+        id: json
+        run: cat ${{ toJSON(github) }}
+
+      # - name: get workflow run number
+      #   id: workflow
+      #   run: echo ::set-output name=wf_run_number::$(cat "${{ toJSON(github) }}" | jq '.run_number')
 
       - name: output workflow run number
         run: echo "This is the workflow run number ${{ steps.workflow.outputs.wf_run_number }}"
