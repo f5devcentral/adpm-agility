@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
      ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+     GITHUB_CONTEXT: ${{ toJSON(github) }}
 
     outputs:
       can_scale: ${{ steps.test.outputs.can_scale }}
@@ -50,10 +51,10 @@ jobs:
 
       - name: output context
         id: json
-        run: echo ::set-output name=gh_context::$( ${{ toJSON(github) }} )
+        run: echo ${{env.GITHUB_CONTEXT}}
       
-      - name: output rendered context
-        run: echo "This is github context ${{ steps.json.outputs.gh_context }}"
+      # - name: output rendered context
+      #   run: echo "This is github context ${{ steps.json.outputs.gh_context }}"
 
       # - name: get workflow run number
       #   id: workflow
