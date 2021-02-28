@@ -303,6 +303,7 @@ jobs:
           echo "this is the student number = ${{ needs.setup.outputs.student_id }}"
           echo "this is the scaling_type = ${{ github.event.client_payload.scaling_type }}"
           echo "this is the new count = ${{ needs.setup.outputs.new_count }}"
+          echo "this is the student consul server = ${{ needs.setup.outputs.student_consul_server }}"
       
       - name: scaling down
         if: needs.setup.outputs.scaling_direction == 'down'
