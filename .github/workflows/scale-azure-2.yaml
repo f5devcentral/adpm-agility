@@ -280,6 +280,7 @@ jobs:
           else
             echo ::set-output name=message::"Can't scale down to the desired capacity of ${{ steps.delta.outputs.wanted_scale_down_count }} because it is lower than the minimum number of instances of ${{ steps.values.outputs.min_count }}"
           fi
+          echo "$message"
 
       - name: Dump steps context
         id: steps_context
