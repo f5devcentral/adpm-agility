@@ -412,7 +412,7 @@ jobs:
       - name: terraform apply /deploy
         run: |
           cd ./workflow_automation/deploy
-          terraform apply --auto-approve 
+          echo ::set-output name=terraform_apply::$(terraform apply --auto-approve)
 
       - name: output context
         id: json
