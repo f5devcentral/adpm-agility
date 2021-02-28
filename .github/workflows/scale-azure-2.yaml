@@ -410,6 +410,7 @@ jobs:
           terraform plan
        
       - name: terraform apply /deploy
+        id: deploy_apply
         run: |
           cd ./workflow_automation/deploy
           echo ::set-output name=terraform_apply::$(terraform apply --auto-approve)
