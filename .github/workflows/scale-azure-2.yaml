@@ -471,7 +471,7 @@ jobs:
         id: context
         env:
           JOB_CONTEXT: ${{ toJSON(job) }}
-        run: echo "$JOB_CONTEXT"
+        run: echo "$JOB_CONTEXT" 
 
       - name: reset run flag
         run: |
