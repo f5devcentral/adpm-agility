@@ -272,7 +272,7 @@ jobs:
 
   
       - name: can't scale
-        id: can't_scale
+        id: cant_scale
         if: steps.test.outputs.can_scale != 'true'
         run: |
           if [[ "${{ github.event.client_payload.scaling_direction }}" == "up" ]]; then
