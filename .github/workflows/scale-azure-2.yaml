@@ -468,9 +468,10 @@ jobs:
 
       
       - name: Dump job context
+        id: context
         env:
           JOB_CONTEXT: ${{ toJSON(job) }}
-        run: echo "$JOB_CONTEXT.services"
+        run: echo "$JOB_CONTEXT"
 
       - name: reset run flag
         run: |
