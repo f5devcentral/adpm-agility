@@ -441,7 +441,7 @@ jobs:
           STEPS_CONTEXT: ${{ toJSON(steps) }}
         run: |
           echo "THIS IS THE STEPS CONTEXT $STEPS_CONTEXT"
-          echo "$STEPS_CONTEXT" | consul kv put -http-addr=${{ needs.setup.outputs.student_consul_server }} workflows/runs/$GITHUB_RUN_NUMBER/jobs/scalingudate -
+          echo "$STEPS_CONTEXT" | consul kv put -http-addr=${{ needs.setup.outputs.student_consul_server }} workflows/runs/$GITHUB_RUN_NUMBER/jobs/scaling -
 
   reset_run_flag:
     if: always()
