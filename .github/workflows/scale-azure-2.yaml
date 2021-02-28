@@ -264,6 +264,7 @@ jobs:
             fi
 
       - name: output direction environment variable
+        id: environment
         run: |
           echo "this is the direction env value ${{ env.direction }}"
           echo "this is the direction output value ${{ steps.test.outputs.direction }}"
@@ -280,9 +281,11 @@ jobs:
           fi
 
       - name: Dump steps context
+        id: steps_context
         env:
           STEPS_CONTEXT: ${{ toJSON(steps) }}
-        run: echo "$STEPS_CONTEXT" | consul kv put -http-addr=${{ steps.current.outputs.student_consul_server}} workflows/runs/$GITHUB_RUN_NUMBER/jobs/setup -
+        run: |
+          echo "$STEPS_CONTEXT" 
         
 
   scale:
