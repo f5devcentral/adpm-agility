@@ -1,7 +1,8 @@
 Class 13: ADC Performance Monitoring and Autoscaling Lab
 ============================================================================
 
-This instructor-led lab will provide hands on experience with the ADC performance-based autoscaling solution.  The solution illustrates how F5's Automation Toolchain can integrate with third party analytics provider(s) to provide cloud-agnostic centralized application delivery monitoring and autoscaling.
+This instructor-led lab will provide hands on experience with the ADC performance-based autoscaling solution.  The solution illustrates how
+F5's Automation Toolchain can integrate with third party analytics provider(s) to provide cloud-agnostic centralized application delivery monitoring and autoscaling.
  
 During this lab attendees will:
 
@@ -17,7 +18,16 @@ During this lab attendees will:
 
 #. Deploy a cloud-based application, along with related infrastructure. 
 
-#. Manage autoscaling operations via a centralized ADPM environment and a third party analytics provider, (Elastic ELK stack) for monitoring/alerting.
+#. Manage autoscaling operations via a centralized ADPM environment and a third party analytics provider, (Elastic ELK stack) for
+   monitoring/alerting.
 
 Expected time to complete: **2 hours**
 
+We will be using a jumpbox to connect to the lab environment. Go to the next section for details on how to connect to the lab environment.
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   module*/startup*
+   module*/lab*
