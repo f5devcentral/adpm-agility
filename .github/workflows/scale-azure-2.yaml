@@ -145,7 +145,7 @@ jobs:
       # - name: push data to student consul server
         # env:
           # GITHUB_CONTEXT: ${{ toJSON(github) }}
-        # run: echo "$GITHUB_CONTEXT" | consul kv put -http-addr=${{ steps.current.outputs.student_consul_server }} workflows/runs/$GITHUB_RUN_NUMBER -
+        # run: echo "$GITHUB_CONTEXT" | consul kv put -http-addr=${{ steps.current.outputs.student_consul_server }} workflows/scaling_events/$GITHUB_RUN_NUMBER -
 
       - name: output last modified times
         id: seconds
@@ -291,7 +291,7 @@ jobs:
         env:
           STEPS_CONTEXT: ${{ toJSON(steps) }}
         run: |
-          echo "$STEPS_CONTEXT" | consul kv put -http-addr=${{ steps.current.outputs.student_consul_server}} workflows/runs/$GITHUB_RUN_NUMBER/jobs/setup -
+          echo "$STEPS_CONTEXT" | consul kv put -http-addr=${{ steps.current.outputs.student_consul_server}} workflows/scaling_events/$GITHUB_RUN_NUMBER/jobs/setup -
 
         
 
@@ -453,7 +453,7 @@ jobs:
           STEPS_CONTEXT: ${{ toJSON(steps) }}
         run: |
           echo "THIS IS THE STEPS CONTEXT $STEPS_CONTEXT"
-          echo "$STEPS_CONTEXT" | consul kv put -http-addr=${{ needs.setup.outputs.student_consul_server }} workflows/runs/$GITHUB_RUN_NUMBER/jobs/scaling -
+          echo "$STEPS_CONTEXT" | consul kv put -http-addr=${{ needs.setup.outputs.student_consul_server }} workflows/scaling_events/$GITHUB_RUN_NUMBER/jobs/scaling -
 
   reset_run_flag:
     if: always()
@@ -475,7 +475,7 @@ jobs:
           STEPS_CONTEXT: ${{ toJSON(steps) }}
         run: |
           echo "THIS IS THE STEPS CONTEXT $STEPS_CONTEXT"
-          echo "$STEPS_CONTEXT" | consul kv put -http-addr=${{ needs.setup.outputs.student_consul_server}} workflows/runs/$GITHUB_RUN_NUMBER/jobs/reset_is_running -
+          echo "$STEPS_CONTEXT" | consul kv put -http-addr=${{ needs.setup.outputs.student_consul_server}} workflows/scaling_events/$GITHUB_RUN_NUMBER/jobs/reset_is_running -
 
       
       - name: Dump job context
