@@ -7,14 +7,14 @@ During this lab attendees will:
 
 #. Utilize various third-party technologies/services along with F5’s automation toolchain including:
 
-   - **F5 BIG-IP(s)** providing L4/L7 ADC Services
-   - F5 DO, (**Declarative Onboarding**) and AS3, (**Application Services 3 Extension**) to deploy to configure BIG-IP application services
-   - F5 TS, (**Telemetry Streaming**) to stream telemetry data to a third party analytics provider
-   - **GitHub Actions** for workflow automation 
-   - **Azure** public cloud for application hosting
-   - **Hashicorp Terraform** and **Consul** for infrastructure provisioning, service discovery and event logging
-   - **Elastic ELK Stack**, (integrated with BIG-IP(s) via TS) for monitoring and alerting
-   - **Locust.io** for load generation
+   * **F5 BIG-IP(s)** providing L4/L7 ADC Services
+   * F5 DO, (**Declarative Onboarding**) and AS3, (**Application Services 3 Extension**) to deploy to configure BIG-IP application services
+   * F5 TS, (**Telemetry Streaming**) to stream telemetry data to a third party analytics provider
+   * **GitHub Actions** for workflow automation 
+   * **Azure** public cloud for application hosting
+   * **Hashicorp Terraform** and **Consul** for infrastructure provisioning, service discovery and event logging
+   * **Elastic ELK Stack**, (integrated with BIG-IP(s) via TS) for monitoring and alerting
+   * **Locust.io** for load generation
 
 #. Deploy a cloud-based application, along with related infrastructure. 
 
