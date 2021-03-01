@@ -19,7 +19,6 @@ jobs:
       we_set_running: ${{ steps.check_running.outputs.we_set_running }}
       bigip_current_count: ${{ steps.current.outputs.bigip_current_count }}
       app_current_count: ${{ steps.current.outputs.app_current_count }}
-      student_consul_server: ${{ steps.current.outputs.student_consul_server }}
     steps:
 
       - name: Dump GitHub context
@@ -47,23 +46,6 @@ jobs:
         env:
           MATRIX_CONTEXT: ${{ toJSON(matrix) }}
         run: echo "$MATRIX_CONTEXT"
-
-      - name: output context
-        id: json
-        run: echo ::set-output name=gh_context::$( "${{ toJSON(github) }}" )
-
-      - name: output run id
-        run: echo "THIS IS THE CONTEXT ${{ steps.json.outputs.gh_context }}"
-      
-      # - name: output rendered context
-      #   run: echo ${{ steps.json.outputs.gh_context }} | jq '.'
-
-      # - name: get workflow run number
-      #   id: workflow
-      #   run: echo ::set-output name=wf_run_number::$(cat "${{ toJSON(github) }}" | jq '.run_number')
-
-      - name: output workflow run number
-        run: echo "This is the workflow run number $GITHUB_RUN_NUMBER"
 
       - name: grab current time
         id: current_time_seconds
@@ -140,13 +122,7 @@ jobs:
           echo ::set-output name=app_current_count::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id}}/scaling/apps/${{ github.event.client_payload.app_name }}/current_count)
 
           echo ::set-output name=bigip_current_count::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id}}/scaling/bigip/current_count)
-          echo ::set-output name=student_consul_server::$(consul kv get -http-addr=${{ steps.consul_params.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id}}/consul_vip)
-
-      # - name: push data to student consul server
-        # env:
-          # GITHUB_CONTEXT: ${{ toJSON(github) }}
-        # run: echo "$GITHUB_CONTEXT" | consul kv put -http-addr=${{ steps.current.outputs.student_consul_server }} workflows/runs/$GITHUB_RUN_NUMBER -
-
+      
       - name: output last modified times
         id: seconds
         run: |
@@ -264,36 +240,20 @@ jobs:
             fi
 
       - name: output direction environment variable
-        id: environment
         run: |
           echo "this is the direction env value ${{ env.direction }}"
           echo "this is the direction output value ${{ steps.test.outputs.direction }}"
           echo "this is the new instance count = ${{ steps.test.outputs.new_count }}"
 
-  
+
       - name: can't scale
-        id: cant_scale
         if: steps.test.outputs.can_scale != 'true'
-        env: 
-          UP_MESSAGE: "Can't scale down to the desired capacity of ${{ steps.delta.outputs.wanted_scale_down_count }} because it is lower than the minimum number of instances of ${{ steps.values.outputs.min_count }}"
-          DOWN_MESSAGE: "Can't scale down to the desired capacity of ${{ steps.delta.outputs.wanted_scale_down_count }} because it is lower than the minimum number of instances of ${{ steps.values.outputs.min_count }}"
         run: |
           if [[ "${{ github.event.client_payload.scaling_direction }}" == "up" ]]; then
-            echo ::set-output name=message::"$UP_MESSAGE"
-            echo "$UP_MESSAGE"
+            echo "Can't scale up to desired capacity of ${{ steps.delta.outputs.wanted_scale_up_count }} because it exceeds the maximum number of instances of ${{ steps.values.outputs.max_count }}"
           else
-            echo ::set-output name=message::"$DOWN_MESSAGE"
-            echo "$DOWN_MESSAGE"
-          fi 
-
-      - name: Dump steps context
-        id: steps_context
-        env:
-          STEPS_CONTEXT: ${{ toJSON(steps) }}
-        run: |
-          echo "$STEPS_CONTEXT" | consul kv put -http-addr=${{ steps.current.outputs.student_consul_server}} workflows/runs/$GITHUB_RUN_NUMBER/jobs/setup -
-
-        
+            echo "Can't scale down to the desired capacity of ${{ steps.delta.outputs.wanted_scale_down_count }} because it is lower than the minimum number of instances of ${{ steps.values.outputs.min_count }}"
+          fi
 
   scale:
     if: needs.setup.outputs.can_scale == 'true'
@@ -313,9 +273,8 @@ jobs:
           echo "this is the student number = ${{ needs.setup.outputs.student_id }}"
           echo "this is the scaling_type = ${{ github.event.client_payload.scaling_type }}"
           echo "this is the new count = ${{ needs.setup.outputs.new_count }}"
-          echo "this is the student consul server = ${{ needs.setup.outputs.student_consul_server }}"
       
-      - name: scaling down 
+      - name: scaling down
         if: needs.setup.outputs.scaling_direction == 'down'
         run: echo "SCALING DOWN" 
 
@@ -326,7 +285,6 @@ jobs:
       - name: assign new count
         id: count
         run: |
-          echo "HOWDY DOODY"
           if [[ "${{ github.event.client_payload.scaling_type }}" == "app" ]]; then
             echo ::set-output name=app_count::${{ needs.setup.outputs.new_count }}
             echo ::set-output name=bigip_count::${{ needs.setup.outputs.bigip_current_count }}
@@ -421,22 +379,12 @@ jobs:
           terraform plan
        
       - name: terraform apply /deploy
-        id: deploy_apply
         run: |
           cd ./workflow_automation/deploy
-          echo ::set-output name=terraform_apply::$(terraform apply --auto-approve)
-
-      - name: output context
-        id: json
-        run: echo ::set-output name=gh_context::$(echo "${{env.GITHUB_CONTEXT}}" )
+          terraform apply --auto-approve 
       
       - name: install consul client
         run: sudo sh scripts/consul.sh
-
-      - name: store github data in student consul
-        run: |
-          consul kv put -http-addr=${{ needs.setup.outputs.student_consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/workflows/
-
 
       - name: update time & count on k/v store
         run: |
@@ -447,13 +395,6 @@ jobs:
             echo `date '+%Y-%m-%d %H:%M:%S'` | consul kv put -http-addr=${{ needs.setup.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/apps/${{ github.event.client_payload.app_name }}/last_modified_timestamp -
             consul kv put -http-addr=${{ needs.setup.outputs.consul_server }} adpm/labs/agility/students/${{ github.event.client_payload.student_id }}/scaling/apps/${{ github.event.client_payload.app_name }}/current_count ${{ steps.count.outputs.app_count }}
           fi
-      
-      - name: Dump steps context
-        env:
-          STEPS_CONTEXT: ${{ toJSON(steps) }}
-        run: |
-          echo "THIS IS THE STEPS CONTEXT $STEPS_CONTEXT"
-          echo "$STEPS_CONTEXT" | consul kv put -http-addr=${{ needs.setup.outputs.student_consul_server }} workflows/runs/$GITHUB_RUN_NUMBER/jobs/scaling -
 
   reset_run_flag:
     if: always()
@@ -470,20 +411,6 @@ jobs:
           echo ::set-env name=CONSUL_HTTP_TOKEN::${{ secrets.CONSUL_HTTP_TOKEN }}
           sudo sh scripts/consul.sh
 
-      - name: Dump steps context
-        env:
-          STEPS_CONTEXT: ${{ toJSON(steps) }}
-        run: |
-          echo "THIS IS THE STEPS CONTEXT $STEPS_CONTEXT"
-          echo "$STEPS_CONTEXT" | consul kv put -http-addr=${{ needs.setup.outputs.student_consul_server}} workflows/runs/$GITHUB_RUN_NUMBER/jobs/reset_is_running -
-
-      
-      - name: Dump job context
-        id: context
-        env:
-          JOB_CONTEXT: ${{ toJSON(job) }}
-        run: echo "$JOB_CONTEXT" 
-
       - name: reset run flag
         run: |
           if [[ ${{ needs.setup.outputs.we_set_running == 'true' }} ]]; then
@@ -494,5 +421,4 @@ jobs:
               echo "RESET RUNNING FLAG"
             fi
           fi
-      
 
