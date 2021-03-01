@@ -146,4 +146,3 @@ const repoPath  = '/repos/f5devcentral/adpm-agility/dispatches'  //Modify to mat
   // Start listener
   console.log("Starting alert processor...\n")
   }).listen(8000);
-

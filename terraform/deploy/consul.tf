@@ -60,7 +60,7 @@ resource "azurerm_virtual_machine" "consulvm" {
 
   os_profile {
     computer_name  = "consulvm"
-    admin_username = "azureuser"
+    admin_username = "consuluser"
     admin_password = var.upassword
     custom_data    = file("./consul.sh")
 
