@@ -1,9 +1,6 @@
 <img src="docs/module1/images/lab_layout.png" alt="Flowers">
-==============================================
 
 This instructor-led lab will provide hands on experience with the ADC performance-based autoscaling solution.  The solution illustrates how F5's Automation Toolchain can integrate with third party analytics provider(s) to provide cloud-agnostic centralized application delivery monitoring and autoscaling.
-
-
 
 During this lab attendees will:
 
