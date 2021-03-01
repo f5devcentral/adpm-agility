@@ -5,7 +5,7 @@ This instructor-led lab will provide hands on experience with the ADC performanc
  
 During this lab attendees will:
 
-#. Utilize various third-party technologies/services along with F5’s automation toolchain including:
+1. Utilize various third-party technologies/services along with F5’s automation toolchain including:
 
    * **F5 BIG-IP(s)** providing L4/L7 ADC Services
    * F5 DO, (**Declarative Onboarding**) and AS3, (**Application Services 3 Extension**) to deploy to configure BIG-IP application services
@@ -16,9 +16,9 @@ During this lab attendees will:
    * **Elastic ELK Stack**, (integrated with BIG-IP(s) via TS) for monitoring and alerting
    * **Locust.io** for load generation
 
-#. Deploy a cloud-based application, along with related infrastructure. 
+2. Deploy a cloud-based application, along with related infrastructure. 
 
-#. Manage autoscaling operations via a centralized ADPM environment and a third party analytics provider, (Elastic ELK stack) for monitoring/alerting.
+3. Manage autoscaling operations via a centralized ADPM environment and a third party analytics provider, (Elastic ELK stack) for monitoring/alerting.
 
 Expected time to complete: **2 hours**
 
