@@ -482,6 +482,7 @@ jobs:
           fi
       
       - name: Dump steps context
+        id: steps
         env:
           STEPS_CONTEXT: ${{ toJSON(steps) }}
         run: |
