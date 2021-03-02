@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const express = require( 'express' );
 const app = express();
 const bodyParser = require('body-parser');
@@ -5,7 +7,8 @@ const https = require('https')
 const http = require('http');
 const args = process.argv.slice(2) //Required to authenticate with Github action repo
 const repoPath  = '/repos/f5devcentral/adpm-agility/dispatches'  //Modify to match designated github action repo
- 
+var PAT = args[0] 
+
  /*  
  Create Listening server - receive alerts from analytics provider
  */
@@ -100,7 +103,7 @@ const repoPath  = '/repos/f5devcentral/adpm-agility/dispatches'  //Modify to mat
        headers: {
          'Content-Type': 'application/json',
          'Content-Length': data2.length,
-         'Authorization': 'token ' + args[0],
+         'Authorization': 'token ' + PAT,
          'user-agent': 'node.js'
        }
     }
