@@ -493,7 +493,7 @@ jobs:
         id: context
         env:
           JOB_CONTEXT: ${{ toJSON(job) }}
-        run: echo "$JOB_CONTEXT" 
+        run: echo "This is the job context $JOB_CONTEXT" 
       
 
       
