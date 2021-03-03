@@ -250,12 +250,12 @@ jobs:
         run: |
           echo $DIRECTION
           echo ::set-output name=can_scale::'false'
-            if [[ $DIRECTION == 'down' ]]  && [[ ${{ steps.delta.outputs.wanted_scale_down_count }} -ge ${{ steps.values.outputs.min_count }} ]]; then
+            if [[ "$DIRECTION" == 'down' ]]  && [[ ${{ steps.delta.outputs.wanted_scale_down_count }} -ge ${{ steps.values.outputs.min_count }} ]]; then
               echo "::set-env name=direction::down"
               echo "DIRECTION IS DOWN"
               echo "::set-output name=new_count::${{ steps.delta.outputs.wanted_scale_down_count }}"
               echo ::set-output name=can_scale::'true'
-            elif [[ $DIRECTION == 'up' ]]  && [[ ${{ steps.delta.outputs.wanted_scale_up_count }} -le ${{ steps.values.outputs.max_count }} ]]; then
+            elif [[ "$DIRECTION" == 'up' ]]  && [[ ${{ steps.delta.outputs.wanted_scale_up_count }} -le ${{ steps.values.outputs.max_count }} ]]; then
                echo "::set-env name=direction::up"
                echo "::set-output name=direction::up"
                echo "DIRECTION IS UP"
