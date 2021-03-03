@@ -470,20 +470,6 @@ jobs:
           echo ::set-env name=CONSUL_HTTP_TOKEN::${{ secrets.CONSUL_HTTP_TOKEN }}
           sudo sh scripts/consul.sh
 
-      - name: Dump steps context
-        env:
-          STEPS_CONTEXT: ${{ toJSON(steps) }}
-        run: |
-          echo "THIS IS THE STEPS CONTEXT $STEPS_CONTEXT"
-          echo "$STEPS_CONTEXT" | consul kv put -http-addr=${{ needs.setup.outputs.student_consul_server}} workflows/scaling_events/$GITHUB_RUN_NUMBER/jobs/reset_is_running -
-
-      
-      - name: Dump job context
-        id: context
-        env:
-          JOB_CONTEXT: ${{ toJSON(job) }}
-        run: echo "$JOB_CONTEXT" 
-
       - name: reset run flag
         run: |
           if [[ ${{ needs.setup.outputs.we_set_running == 'true' }} ]]; then
@@ -494,5 +480,21 @@ jobs:
               echo "RESET RUNNING FLAG"
             fi
           fi
+      
+      - name: Dump steps context
+        id: steps
+        env:
+          STEPS_CONTEXT: ${{ toJSON(steps) }}
+        run: |
+          echo "THIS IS THE STEPS CONTEXT $STEPS_CONTEXT"
+          echo "$STEPS_CONTEXT" | consul kv put -http-addr=${{ needs.setup.outputs.student_consul_server}} workflows/scaling_events/$GITHUB_RUN_NUMBER/jobs/reset_is_running - 
+
+      - name: Dump job context
+        id: context
+        env:
+          JOB_CONTEXT: ${{ toJSON(job) }}
+        run: echo "This is the job context $JOB_CONTEXT" 
+      
+
       
 
