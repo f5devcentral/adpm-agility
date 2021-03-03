@@ -6,7 +6,7 @@ resource "consul_keys" "app" {
     value = local.bigip_count
   }
   key {
-    path  = format("adpm/labs/agility/students/%s/scaling/app/%s/current_count", local.student_id, var.app_name)
+    path  = format("adpm/labs/agility/students/%s/scaling/apps/%s/current_count", local.student_id, var.app_name)
     value = local.app_count
   }
 }
