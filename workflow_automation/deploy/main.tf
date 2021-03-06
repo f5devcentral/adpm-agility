@@ -1,3 +1,8 @@
+
+provider "consul" {
+  address = "3.95.15.85:8500"
+}
+
 #
 # Create a random id
 #
